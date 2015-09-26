@@ -65,12 +65,6 @@
 						<goals>
 							<goal>jar</goal>
 						</goals>
-						<!-- <configuration> -->
-						<!-- <classifier>client</classifier> -->
-						<!-- <includes> -->
-						<!-- <include>**/service/*</include> -->
-						<!-- </includes> -->
-						<!-- </configuration> -->
 					</execution>
 				</executions>
 			</plugin>
