@@ -1,7 +1,11 @@
 package org.thinkdita.model2dita;
 
+import java.io.File;
+import java.io.IOException;
+
 import javax.swing.text.BadLocationException;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
 import ro.sync.annotations.api.API;
@@ -56,8 +60,15 @@ public class GenerateOperation implements AuthorOperation {
 			e.printStackTrace();
 		}
 		
-		String language = "en-US";
+		String projectName = "";		
+		try {
+			projectName = authorDocumentController.findNodesByXPath("//projectname", true, true, true)[0].getTextContent();
+		} catch (BadLocationException e) {
+			e.printStackTrace();
+		}
+		logger.debug("projectName: " + projectName);
 		
+		String language = "en-US";		
 		try {
 			language = authorDocumentController.findNodesByXPath("//language", true, true, true)[0].getTextContent();
 		} catch (BadLocationException e) {
@@ -68,6 +79,15 @@ public class GenerateOperation implements AuthorOperation {
 		String oxygenInstallDir = URLUtil.uncorrect(authorAccess.getUtilAccess().expandEditorVariables(
 				"${oxygenInstallDir}", null));
 		logger.debug("oxygenInstallDir: " + oxygenInstallDir);
+		
+		String projectsDir = oxygenInstallDir + File.separator + "projects" + File.separator + projectName;
+		try {
+			FileUtils.forceMkdir(new File(projectsDir));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		logger.debug("projectsDir: " + projectsDir);
 
 		Object[] folderNodeObjects = authorDocumentController.evaluateXPath("//topic[level/text() = 1]",
 				currentNode, false, true, true, false, XPathVersion.XPATH_3_0);
