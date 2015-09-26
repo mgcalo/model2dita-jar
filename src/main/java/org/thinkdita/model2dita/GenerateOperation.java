@@ -2,6 +2,8 @@ package org.thinkdita.model2dita;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.text.BadLocationException;
 
@@ -59,50 +61,108 @@ public class GenerateOperation implements AuthorOperation {
 
 			e.printStackTrace();
 		}
-		
-		String projectName = "";		
+
+		String projectName = "";
 		try {
-			projectName = authorDocumentController.findNodesByXPath("//projectname", true, true, true)[0].getTextContent();
+			projectName = authorDocumentController.findNodesByXPath("//projectname", true, true, true)[0]
+					.getTextContent();
 		} catch (BadLocationException e) {
 			e.printStackTrace();
 		}
 		logger.debug("projectName: " + projectName);
-		
-		String language = "en-US";		
+
+		String language = "en-US";
 		try {
-			language = authorDocumentController.findNodesByXPath("//language", true, true, true)[0].getTextContent();
+			language = authorDocumentController.findNodesByXPath("//language", true, true, true)[0]
+					.getTextContent();
 		} catch (BadLocationException e) {
 			e.printStackTrace();
 		}
 		logger.debug("language: " + language);
-		
+
 		String oxygenInstallDir = URLUtil.uncorrect(authorAccess.getUtilAccess().expandEditorVariables(
 				"${oxygenInstallDir}", null));
 		logger.debug("oxygenInstallDir: " + oxygenInstallDir);
-		
-		String projectsDir = oxygenInstallDir + File.separator + "projects" + File.separator + projectName;
+
+		File projectsDir = new File(oxygenInstallDir + File.separator + "projects" + File.separator
+				+ projectName);
 		try {
-			FileUtils.forceMkdir(new File(projectsDir));
+			FileUtils.forceMkdir(projectsDir);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		logger.debug("projectsDir: " + projectsDir);
 
-		Object[] folderNodeObjects = authorDocumentController.evaluateXPath("//topic[level/text() = 1]",
-				currentNode, false, true, true, false, XPathVersion.XPATH_3_0);
+		String createSubfolder = "0";
+		try {
+			createSubfolder = authorDocumentController.findNodesByXPath("//subfolders", true, true, true)[0]
+					.getTextContent();
+		} catch (BadLocationException e) {
+			e.printStackTrace();
+		}
+		logger.debug("createSubfolder: " + createSubfolder);
 
-		for (int i = 0, il = folderNodeObjects.length; i < il; i++) {
-			Object targetNodeObject = folderNodeObjects[i];
+		String createImagefolder = "0";
+		try {
+			createImagefolder = authorDocumentController
+					.findNodesByXPath("//img-folders", true, true, true)[0].getTextContent();
+		} catch (BadLocationException e) {
+			e.printStackTrace();
+		}
+		logger.debug("createImagefolder: " + createImagefolder);
 
-			if (targetNodeObject instanceof AuthorElementDomWrapper) {
-				AuthorNode targetNode = ((AuthorElementDomWrapper) targetNodeObject).getWrappedAuthorNode();
+		// generate the 'topic' objects
+		AuthorNode rootNode = authorDocumentController.findNodesByXPath("/*", true,
+				true, true)[0];
+		logger.debug("rootNode name: " + rootNode.getName());
 
-				logger.debug("targetNode: " + targetNode.getDisplayName() + ", " + targetNode.getName());
+		AuthorNode[] topicAuthorNodes = authorDocumentController.findNodesByXPath("topic", rootNode, true,
+				true, true, false);
+		logger.debug("topicAuthorNodes number: " + topicAuthorNodes.length);
+		List<Topic> topicObjects = new ArrayList<Topic>();
+
+		for (int i = 0, il = topicAuthorNodes.length; i < il; i++) {
+			Topic topicObject = new Topic(authorDocumentController, topicAuthorNodes[i]);
+			topicObjects.add(i, topicObject);
+			try {
+				logger.debug("title: "
+						+ authorDocumentController.findNodesByXPath("//title", topicAuthorNodes[i], true,
+								true, true, true)[0].getTextContent());
+			} catch (BadLocationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			logger.debug("topicObject #" + (i + 1) + ": " + topicObject);
+		}
+		logger.debug("topicObjects: " + topicObjects);
+
+		// Create keymaps?
+
+		// Create subfolders?
+		if (createSubfolder.equals("1")) {
+
+		} else {
+			try {
+				FileUtils.forceMkdir(new File(projectsDir + File.separator + "source"));
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
 		}
 
-		
+		// Create image subfolders?
+		if (createImagefolder.equals("1")) {
+
+		} else {
+			try {
+				FileUtils.forceMkdir(new File(projectsDir + File.separator + "source" + File.separator
+						+ "aa_img"));
+
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+
 	}
 
 	/**
