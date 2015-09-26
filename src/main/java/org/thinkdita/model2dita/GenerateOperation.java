@@ -17,6 +17,7 @@ import ro.sync.ecss.extensions.api.AuthorOperationException;
 import ro.sync.ecss.extensions.api.XPathVersion;
 import ro.sync.ecss.extensions.api.access.AuthorEditorAccess;
 import ro.sync.ecss.extensions.api.node.AuthorNode;
+import ro.sync.util.URLUtil;
 
 @API(type = APIType.INTERNAL, src = SourceType.PUBLIC)
 public class GenerateOperation implements AuthorOperation {
@@ -54,6 +55,19 @@ public class GenerateOperation implements AuthorOperation {
 
 			e.printStackTrace();
 		}
+		
+		String language = "en-US";
+		
+		try {
+			language = authorDocumentController.findNodesByXPath("//language", true, true, true)[0].getTextContent();
+		} catch (BadLocationException e) {
+			e.printStackTrace();
+		}
+		logger.debug("language: " + language);
+		
+		String oxygenInstallDir = URLUtil.uncorrect(authorAccess.getUtilAccess().expandEditorVariables(
+				"${oxygenInstallDir}", null));
+		logger.debug("oxygenInstallDir: " + oxygenInstallDir);
 
 		Object[] folderNodeObjects = authorDocumentController.evaluateXPath("//topic[level/text() = 1]",
 				currentNode, false, true, true, false, XPathVersion.XPATH_3_0);
