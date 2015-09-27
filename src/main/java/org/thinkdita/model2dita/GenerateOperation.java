@@ -84,6 +84,13 @@ public class GenerateOperation implements AuthorOperation {
 				"${oxygenInstallDir}", null));
 		logger.debug("oxygenInstallDir: " + oxygenInstallDir);
 
+		String frameworkDir = URLUtil.uncorrect(authorAccess.getUtilAccess().expandEditorVariables(
+				"${frameworkDir}", null));
+		logger.debug("frameworkDir: " + frameworkDir);
+
+		File templatesDir = new File(frameworkDir + File.separator + "templates" + File.separator + language);
+		logger.debug("templatesDir: " + templatesDir);
+
 		File projectsDir = new File(oxygenInstallDir + File.separator + "projects" + File.separator
 				+ projectName);
 		try {
@@ -113,18 +120,18 @@ public class GenerateOperation implements AuthorOperation {
 		logger.debug("createImagefolder: " + createImagefolder);
 
 		// generate the 'topic' objects
-		AuthorNode rootNode = authorDocumentController.findNodesByXPath("/*", true,
-				true, true)[0];
+		AuthorNode rootNode = authorDocumentController.findNodesByXPath("/*", true, true, true)[0];
 		logger.debug("rootNode name: " + rootNode.getName());
 
-		AuthorNode[] topicAuthorNodes = authorDocumentController.findNodesByXPath("topic", rootNode, true,
+		AuthorNode[] topicAuthorNodes = authorDocumentController.findNodesByXPath("//topic", null, true,
 				true, true, false);
-		logger.debug("topicAuthorNodes number: " + topicAuthorNodes.length);
+		int topicAuthorNodesNumber = topicAuthorNodes.length;
+		logger.debug("topicAuthorNodes number: " + topicAuthorNodesNumber);
 		List<Topic> topicObjects = new ArrayList<Topic>();
 
-		for (int i = 0, il = topicAuthorNodes.length; i < il; i++) {
+		for (int i = 0, il = topicAuthorNodesNumber; i < il; i++) {
 			Topic topicObject = new Topic(authorDocumentController, topicAuthorNodes[i]);
-			topicObjects.add(i, topicObject);
+			topicObjects.add(topicObject);
 			try {
 				logger.debug("title: "
 						+ authorDocumentController.findNodesByXPath("//title", topicAuthorNodes[i], true,
@@ -155,9 +162,12 @@ public class GenerateOperation implements AuthorOperation {
 
 		} else {
 			try {
-				FileUtils.forceMkdir(new File(projectsDir + File.separator + "source" + File.separator
-						+ "aa_img"));
-
+				File sourceFolder = new File(projectsDir + File.separator + "source");
+				FileUtils.forceMkdir(new File(sourceFolder + File.separator + "aa_img"));
+				for (int i = 0, il = topicAuthorNodesNumber; i < il; i++) {
+					Topic topic = topicObjects.get(i);
+					createFile(sourceFolder, topic, templatesDir);
+				}
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -178,5 +188,11 @@ public class GenerateOperation implements AuthorOperation {
 	 */
 	public String getDescription() {
 		return "Execute a void operation.";
+	}
+
+	private void createFile(File path, Topic topic, File templatesDir) {
+		String fileName = topic.getFilename();
+		String fileType = topic.getType();
+
 	}
 }
