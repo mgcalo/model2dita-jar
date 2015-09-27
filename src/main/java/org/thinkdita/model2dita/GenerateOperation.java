@@ -1,9 +1,12 @@
 package org.thinkdita.model2dita;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 import javax.swing.text.BadLocationException;
 
@@ -88,7 +91,8 @@ public class GenerateOperation implements AuthorOperation {
 				"${frameworkDir}", null));
 		logger.debug("frameworkDir: " + frameworkDir);
 
-		File templatesDir = new File(frameworkDir + File.separator + "templates" + File.separator + language);
+		File templatesDir = new File(frameworkDir + File.separator + "templates" + File.separator
+				+ language);
 		logger.debug("templatesDir: " + templatesDir);
 
 		File projectsDir = new File(oxygenInstallDir + File.separator + "projects" + File.separator
@@ -96,7 +100,6 @@ public class GenerateOperation implements AuthorOperation {
 		try {
 			FileUtils.forceMkdir(projectsDir);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		logger.debug("projectsDir: " + projectsDir);
@@ -191,8 +194,31 @@ public class GenerateOperation implements AuthorOperation {
 	}
 
 	private void createFile(File path, Topic topic, File templatesDir) {
+		String fileTitle = topic.getTitle();
+		logger.debug("fileTitle: " + fileTitle);
+		
 		String fileName = topic.getFilename();
+		logger.debug("fileName: " + fileName);
+		
 		String fileType = topic.getType();
+		logger.debug("fileType: " + fileType);
+		
+		String fileContent = null;
+		try {
+			fileContent = new Scanner(new FileInputStream(new File(templatesDir + File.separator + fileType
+					+ ".xml")), "UTF-8").useDelimiter("\\A").next();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		logger.debug("fileContent: " + fileContent);
 
+		fileContent = fileContent.replace("${title}", fileTitle);
+		logger.debug("processed fileContent: " + fileContent);
+		
+		try {
+			FileUtils.writeStringToFile(new File(path + File.separator + fileName), fileContent, "UTF-8");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 }
