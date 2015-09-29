@@ -14,11 +14,11 @@ public class Topic {
 
 	public Topic(AuthorDocumentController authorDocumentController, AuthorNode topic) {
 		try {
-			setLevel(authorDocumentController.findNodesByXPath("//level", topic, true, true, true,
+			setLevel(authorDocumentController.findNodesByXPath("level", topic, true, true, true,
 					false)[0].getTextContent());
-			setTitle(authorDocumentController.findNodesByXPath("//title", topic, true, true, true,
+			setTitle(authorDocumentController.findNodesByXPath("title", topic, true, true, true,
 					false)[0].getTextContent());	
-			setType(authorDocumentController.findNodesByXPath("//type", topic, true, true, true,
+			setType(authorDocumentController.findNodesByXPath("type", topic, true, true, true,
 					false)[0].getTextContent());	
 			setFilename((getType().substring(0, 1) + "_" + getTitle().trim().toLowerCase() + ".xml").replace(" ", "-"));
 		} catch (BadLocationException e) {
