@@ -53,6 +53,10 @@ public class GenerateOperation implements AuthorOperation {
 	public void doOperation(AuthorAccess authorAccess, ArgumentsMap args) throws AuthorOperationException {
 		AuthorEditorAccess authorEditorAccess = authorAccess.getEditorAccess();
 		AuthorDocumentController authorDocumentController = authorAccess.getDocumentController();
+		
+		//get the target dir for creating the DITA project
+		File projectDir = authorAccess.getWorkspaceAccess().chooseDirectory();
+		logger.debug("projectDir: " + projectDir);		
 
 		AuthorNode currentNode = null;
 
@@ -92,15 +96,6 @@ public class GenerateOperation implements AuthorOperation {
 		File templatesDir = new File(frameworkDir + File.separator + "templates" + File.separator
 				+ language);
 		logger.debug("templatesDir: " + templatesDir);
-
-		File projectsDir = new File(oxygenInstallDir + File.separator + "projects" + File.separator
-				+ projectName);
-		try {
-			FileUtils.forceMkdir(projectsDir);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		logger.debug("projectsDir: " + projectsDir);
 
 		String createSubfolder = "0";
 		try {
@@ -152,7 +147,7 @@ public class GenerateOperation implements AuthorOperation {
 
 		} else {
 			try {
-				FileUtils.forceMkdir(new File(projectsDir + File.separator + "source"));
+				FileUtils.forceMkdir(new File(projectDir + File.separator + "source"));
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -163,7 +158,7 @@ public class GenerateOperation implements AuthorOperation {
 
 		} else {
 			try {
-				File sourceFolder = new File(projectsDir + File.separator + "source");
+				File sourceFolder = new File(projectDir + File.separator + "source");
 				FileUtils.forceMkdir(new File(sourceFolder + File.separator + "aa_img"));
 				for (int i = 0, il = topicAuthorNodesNumber; i < il; i++) {
 					Topic topic = topicObjects.get(i);
