@@ -215,6 +215,7 @@ public class GenerateOperation implements AuthorOperation {
 		logger.debug("fileContent: " + fileContent);
 
 		fileContent = fileContent.replace("${title}", fileTitle);
+		fileContent = fileContent.replace("${id}", fileName.replace(".xml", ""));
 		logger.debug("processed fileContent: " + fileContent);
 
 		try {
