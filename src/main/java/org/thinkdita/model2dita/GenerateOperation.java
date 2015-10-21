@@ -16,15 +16,14 @@ import org.apache.log4j.Logger;
 import ro.sync.annotations.api.API;
 import ro.sync.annotations.api.APIType;
 import ro.sync.annotations.api.SourceType;
-import ro.sync.ecss.dom.wrappers.AuthorElementDomWrapper;
 import ro.sync.ecss.extensions.api.ArgumentDescriptor;
 import ro.sync.ecss.extensions.api.ArgumentsMap;
 import ro.sync.ecss.extensions.api.AuthorAccess;
 import ro.sync.ecss.extensions.api.AuthorDocumentController;
 import ro.sync.ecss.extensions.api.AuthorOperation;
 import ro.sync.ecss.extensions.api.AuthorOperationException;
-import ro.sync.ecss.extensions.api.XPathVersion;
 import ro.sync.ecss.extensions.api.access.AuthorEditorAccess;
+import ro.sync.ecss.extensions.api.access.AuthorWorkspaceAccess;
 import ro.sync.ecss.extensions.api.node.AuthorNode;
 import ro.sync.util.URLUtil;
 
@@ -55,6 +54,18 @@ public class GenerateOperation implements AuthorOperation {
 	public void doOperation(AuthorAccess authorAccess, ArgumentsMap args) throws AuthorOperationException {
 		AuthorEditorAccess authorEditorAccess = authorAccess.getEditorAccess();
 		AuthorDocumentController authorDocumentController = authorAccess.getDocumentController();
+		AuthorWorkspaceAccess authorWorkspaceAccess = authorAccess.getWorkspaceAccess();
+		
+		//get the target dir for creating the DITA project
+		File projectDir = null;
+		projectDir = authorWorkspaceAccess.chooseDirectory();
+		logger.debug("projectDir: " + projectDir);	
+		
+		if (projectDir != null) {
+		} else {
+			authorWorkspaceAccess.showErrorMessage("You have to choose an existing folder, otherwise this operation will stop.");
+			return;
+		}
 
 		AuthorNode currentNode = null;
 
@@ -94,15 +105,6 @@ public class GenerateOperation implements AuthorOperation {
 		File templatesDir = new File(frameworkDir + File.separator + "templates" + File.separator
 				+ language);
 		logger.debug("templatesDir: " + templatesDir);
-
-		File projectsDir = new File(oxygenInstallDir + File.separator + "projects" + File.separator
-				+ projectName);
-		try {
-			FileUtils.forceMkdir(projectsDir);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		logger.debug("projectsDir: " + projectsDir);
 
 		String createSubfolder = "0";
 		try {
@@ -154,7 +156,7 @@ public class GenerateOperation implements AuthorOperation {
 
 		} else {
 			try {
-				FileUtils.forceMkdir(new File(projectsDir + File.separator + "source"));
+				FileUtils.forceMkdir(new File(projectDir + File.separator + "source"));
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -165,7 +167,7 @@ public class GenerateOperation implements AuthorOperation {
 
 		} else {
 			try {
-				File sourceFolder = new File(projectsDir + File.separator + "source");
+				File sourceFolder = new File(projectDir + File.separator + "source");
 				FileUtils.forceMkdir(new File(sourceFolder + File.separator + "aa_img"));
 				for (int i = 0, il = topicAuthorNodesNumber; i < il; i++) {
 					Topic topic = topicObjects.get(i);
@@ -196,13 +198,13 @@ public class GenerateOperation implements AuthorOperation {
 	private void createFile(File path, Topic topic, File templatesDir) {
 		String fileTitle = topic.getTitle();
 		logger.debug("fileTitle: " + fileTitle);
-		
+
 		String fileName = topic.getFilename();
 		logger.debug("fileName: " + fileName);
-		
+
 		String fileType = topic.getType();
 		logger.debug("fileType: " + fileType);
-		
+
 		String fileContent = null;
 		try {
 			fileContent = new Scanner(new FileInputStream(new File(templatesDir + File.separator + fileType
@@ -214,7 +216,7 @@ public class GenerateOperation implements AuthorOperation {
 
 		fileContent = fileContent.replace("${title}", fileTitle);
 		logger.debug("processed fileContent: " + fileContent);
-		
+
 		try {
 			FileUtils.writeStringToFile(new File(path + File.separator + fileName), fileContent, "UTF-8");
 		} catch (IOException e) {
