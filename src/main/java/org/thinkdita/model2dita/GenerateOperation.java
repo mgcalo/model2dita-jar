@@ -55,15 +55,16 @@ public class GenerateOperation implements AuthorOperation {
 		AuthorEditorAccess authorEditorAccess = authorAccess.getEditorAccess();
 		AuthorDocumentController authorDocumentController = authorAccess.getDocumentController();
 		AuthorWorkspaceAccess authorWorkspaceAccess = authorAccess.getWorkspaceAccess();
-		
-		//get the target dir for creating the DITA project
+
+		// get the target dir for creating the DITA project
 		File projectDir = null;
 		projectDir = authorWorkspaceAccess.chooseDirectory();
-		logger.debug("projectDir: " + projectDir);	
-		
+		logger.debug("projectDir: " + projectDir);
+
 		if (projectDir != null) {
 		} else {
-			authorWorkspaceAccess.showErrorMessage("You have to choose an existing folder, otherwise this operation will stop.");
+			authorWorkspaceAccess
+					.showErrorMessage("You have to choose an existing folder, otherwise this operation will stop.");
 			return;
 		}
 
@@ -171,12 +172,15 @@ public class GenerateOperation implements AuthorOperation {
 				FileUtils.forceMkdir(new File(sourceFolder + File.separator + "aa_img"));
 				for (int i = 0, il = topicAuthorNodesNumber; i < il; i++) {
 					Topic topic = topicObjects.get(i);
-					createFile(sourceFolder, topic, templatesDir);
+					createTopicFile(sourceFolder, topic, templatesDir);
 				}
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
+
+		// Create the root ditamap
+		createDitamapFile(projectDir, projectName, "", templatesDir);
 
 	}
 
@@ -195,7 +199,7 @@ public class GenerateOperation implements AuthorOperation {
 		return "Execute a void operation.";
 	}
 
-	private void createFile(File path, Topic topic, File templatesDir) {
+	private void createTopicFile(File path, Topic topic, File templatesDir) {
 		String fileTitle = topic.getTitle();
 		logger.debug("fileTitle: " + fileTitle);
 
@@ -220,6 +224,29 @@ public class GenerateOperation implements AuthorOperation {
 
 		try {
 			FileUtils.writeStringToFile(new File(path + File.separator + fileName), fileContent, "UTF-8");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void createDitamapFile(File path, String fileTitle, String topicrefs, File templatesDir) {
+		String fileContent = null;
+		try {
+			fileContent = new Scanner(new FileInputStream(new File(templatesDir + File.separator
+					+ "root.ditamap")), "UTF-8").useDelimiter("\\A").next();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		logger.debug("fileContent: " + fileContent);
+
+		fileContent = fileContent.replace("${title}", fileTitle);
+		fileContent = fileContent.replace("${topicrefs}", topicrefs);
+		logger.debug("processed fileContent: " + fileContent);
+
+		try {
+			FileUtils.writeStringToFile(new File(path + File.separator
+					+ (fileTitle.trim().toLowerCase() + ".ditamap").replace(" ", "-")), fileContent,
+					"UTF-8");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
