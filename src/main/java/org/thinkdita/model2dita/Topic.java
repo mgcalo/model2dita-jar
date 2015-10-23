@@ -15,6 +15,7 @@ public class Topic implements java.io.Serializable {
 	private String title;
 	private String type;
 	private String filename;
+	private String filePath;
 
 	public Topic(AuthorDocumentController authorDocumentController, AuthorNode topic) {
 		try {
@@ -66,6 +67,14 @@ public class Topic implements java.io.Serializable {
 		this.filename = filename;
 	}
 
+	public String getFilePath() {
+		return filePath;
+	}
+
+	public void setFilePath(String filePath) {
+		this.filePath = filePath;
+	}
+	
 	public String toString() {
 		return "{" + "level = " + getLevel() + ", " + "title = " + getTitle() + ", " + "type = "
 				+ getType() + ", " + "filename = " + getFilename() + "}";
