@@ -3,7 +3,9 @@ package org.thinkdita.model2dita;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -158,6 +160,12 @@ public class GenerateOperation implements AuthorOperation {
 		} else {
 			try {
 				FileUtils.forceMkdir(new File(projectDir + File.separator + "source"));
+				for (int i = 0, il = topicObjects.size(); i < il; i++) {
+					Topic topicObject = topicObjects.get(i);
+					topicObject.setFilePath("source/" + topicObject.getFilename());
+					logger.debug("topicObject #" + (i + 1) + ": " + topicObject);
+				}
+				logger.debug("topicObjects: " + topicObjects);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -181,6 +189,17 @@ public class GenerateOperation implements AuthorOperation {
 
 		// Create the root ditamap
 		createDitamapFile(projectDir, projectName, "", templatesDir);
+
+		FileOutputStream f_out;
+		try {
+			f_out = new FileOutputStream("topicObjects.ser");
+			ObjectOutputStream obj_out = new ObjectOutputStream(f_out);
+			obj_out.writeObject(topicObjects);
+		} catch (FileNotFoundException e1) {
+			e1.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 
 	}
 
