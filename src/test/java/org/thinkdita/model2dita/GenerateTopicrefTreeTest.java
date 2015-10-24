@@ -1,13 +1,22 @@
 package org.thinkdita.model2dita;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
+
+import org.apache.commons.io.FileUtils;
 import org.junit.Test;
-import org.thinkdita.model2dita.Topic;
 
 public class GenerateTopicrefTreeTest {
 
@@ -15,26 +24,32 @@ public class GenerateTopicrefTreeTest {
 	public void test1() {
 		FileInputStream fis;
 		List<Topic> topicObjects = null;
-		
+
 		try {
-			fis = new FileInputStream("topicObjects.ser");
-			// Read object using ObjectInputStream
+			fis = new FileInputStream(new File(getClass().getResource("topicObjects.ser").toURI()));
 			ObjectInputStream ois = new ObjectInputStream(fis);
 
-			// Read an object
-			topicObjects = (List<Topic>) ois.readObject();			
+			topicObjects = (List<Topic>) ois.readObject();
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (URISyntaxException e) {
 			e.printStackTrace();
 		}
 
-		System.out.println(topicObjects);
+		String topicrefTree = GenerateOperation.parseTopicObjects(topicObjects);
+
+		try {
+			FileUtils.writeStringToFile(new File("topicObjects.xml"), topicrefTree);
+		} catch (UnsupportedEncodingException e1) {
+			e1.printStackTrace();
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
 
 	}
+
 }

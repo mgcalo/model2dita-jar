@@ -11,7 +11,7 @@ public class Topic implements java.io.Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = 8612698296051094780L;
-	private String level;
+	private int level;
 	private String title;
 	private String type;
 	private String filename;
@@ -19,8 +19,8 @@ public class Topic implements java.io.Serializable {
 
 	public Topic(AuthorDocumentController authorDocumentController, AuthorNode topic) {
 		try {
-			setLevel(authorDocumentController.findNodesByXPath("level", topic, true, true, true, false)[0]
-					.getTextContent());
+			setLevel(new Integer(authorDocumentController.findNodesByXPath("level", topic, true, true, true, false)[0]
+					.getTextContent()));
 			setTitle(authorDocumentController.findNodesByXPath("title", topic, true, true, true, false)[0]
 					.getTextContent());
 			setType(authorDocumentController.findNodesByXPath("type", topic, true, true, true, false)[0]
@@ -35,11 +35,11 @@ public class Topic implements java.io.Serializable {
 
 	}
 
-	public String getLevel() {
+	public int getLevel() {
 		return level;
 	}
 
-	public void setLevel(String level) {
+	public void setLevel(int level) {
 		this.level = level;
 	}
 
