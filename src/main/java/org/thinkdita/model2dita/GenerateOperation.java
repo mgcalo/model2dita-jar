@@ -1,14 +1,22 @@
 package org.thinkdita.model2dita;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
 import javax.swing.text.BadLocationException;
+import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
@@ -158,6 +166,12 @@ public class GenerateOperation implements AuthorOperation {
 		} else {
 			try {
 				FileUtils.forceMkdir(new File(projectDir + File.separator + "source"));
+				for (int i = 0, il = topicObjects.size(); i < il; i++) {
+					Topic topicObject = topicObjects.get(i);
+					topicObject.setFilePath("source/" + topicObject.getFilename());
+					logger.debug("topicObject #" + (i + 1) + ": " + topicObject);
+				}
+				logger.debug("topicObjects: " + topicObjects);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -180,7 +194,21 @@ public class GenerateOperation implements AuthorOperation {
 		}
 
 		// Create the root ditamap
-		createDitamapFile(projectDir, projectName, "", templatesDir);
+		String topicrefTree = parseTopicObjects(topicObjects);
+		logger.debug("topicrefTree: " + topicrefTree);
+
+		createDitamapFile(projectDir, projectName, topicrefTree, templatesDir);
+
+		// FileOutputStream f_out;
+		// try {
+		// f_out = new FileOutputStream("topicObjects.ser");
+		// ObjectOutputStream obj_out = new ObjectOutputStream(f_out);
+		// obj_out.writeObject(topicObjects);
+		// } catch (FileNotFoundException e1) {
+		// e1.printStackTrace();
+		// } catch (IOException e) {
+		// e.printStackTrace();
+		// }
 
 	}
 
@@ -229,7 +257,7 @@ public class GenerateOperation implements AuthorOperation {
 		}
 	}
 
-	private void createDitamapFile(File path, String fileTitle, String topicrefs, File templatesDir) {
+	private void createDitamapFile(File path, String fileTitle, String topicrefTree, File templatesDir) {
 		String fileContent = null;
 		try {
 			fileContent = new Scanner(new FileInputStream(new File(templatesDir + File.separator
@@ -240,7 +268,7 @@ public class GenerateOperation implements AuthorOperation {
 		logger.debug("fileContent: " + fileContent);
 
 		fileContent = fileContent.replace("${title}", fileTitle);
-		fileContent = fileContent.replace("${topicrefs}", topicrefs);
+		fileContent = fileContent.replace("${topicrefs}", topicrefTree);
 		logger.debug("processed fileContent: " + fileContent);
 
 		try {
@@ -250,5 +278,60 @@ public class GenerateOperation implements AuthorOperation {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	public static String parseTopicObjects(List<Topic> topicObjects) {
+		String topicrefTree = "";
+
+		XMLOutputFactory actionsOutputFactory = XMLOutputFactory.newInstance();
+
+		ByteArrayOutputStream parserOutput = new ByteArrayOutputStream();
+
+		XMLStreamWriter streamWriter;
+		try {
+			streamWriter = actionsOutputFactory.createXMLStreamWriter(parserOutput);
+
+			int topicObjectsNumber = topicObjects.size();
+
+			for (int i = 0, il = topicObjectsNumber; i < il; i++) {
+				Topic currentTopicObject = topicObjects.get(i);
+
+				int currentTopicObjectLevel = currentTopicObject.getLevel();
+				int nextTopicObjectLevel = (i == topicObjectsNumber - 1) ? 1 : topicObjects.get(i + 1)
+						.getLevel();
+
+				if (currentTopicObjectLevel == nextTopicObjectLevel
+						|| currentTopicObjectLevel > nextTopicObjectLevel) {
+					streamWriter.writeEmptyElement("topicref");
+				} else {
+					streamWriter.writeStartElement("topicref");
+				}
+
+				// TODO: delete start
+				streamWriter.writeAttribute("level", Integer.toString(currentTopicObjectLevel));
+				// TODO: delete end
+				streamWriter.writeAttribute("href", currentTopicObject.getFilePath());
+				streamWriter.writeAttribute("navtitle", currentTopicObject.getTitle());
+				streamWriter.writeAttribute("format", "dita");
+				streamWriter.writeAttribute("type", currentTopicObject.getType());
+
+				if (currentTopicObjectLevel > nextTopicObjectLevel) {
+					for (int j = 0, jl = currentTopicObjectLevel - nextTopicObjectLevel; j < jl; j++) {
+						streamWriter.writeEndElement();
+					}
+				}
+			}
+
+		} catch (XMLStreamException e) {
+			e.printStackTrace();
+		}
+
+		try {
+			topicrefTree = parserOutput.toString(StandardCharsets.UTF_8.displayName());
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+
+		return topicrefTree;
 	}
 }
