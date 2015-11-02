@@ -4,9 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -145,6 +143,7 @@ public class GenerateOperation implements AuthorOperation {
 
 		for (int i = 0, il = topicAuthorNodesNumber; i < il; i++) {
 			Topic topicObject = new Topic(authorDocumentController, topicAuthorNodes[i]);
+			topicObject.setFilePath("source/" + topicObject.getFilename());
 			topicObjects.add(topicObject);
 			try {
 				logger.debug("title: "
@@ -163,18 +162,6 @@ public class GenerateOperation implements AuthorOperation {
 		// Create subfolders?
 		if (createSubfolder.equals("1")) {
 
-		} else {
-			try {
-				FileUtils.forceMkdir(new File(projectDir + File.separator + "source"));
-				for (int i = 0, il = topicObjects.size(); i < il; i++) {
-					Topic topicObject = topicObjects.get(i);
-					topicObject.setFilePath("source/" + topicObject.getFilename());
-					logger.debug("topicObject #" + (i + 1) + ": " + topicObject);
-				}
-				logger.debug("topicObjects: " + topicObjects);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
 		}
 
 		// Create image subfolders?
