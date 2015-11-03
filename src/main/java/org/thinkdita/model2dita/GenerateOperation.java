@@ -268,13 +268,15 @@ public class GenerateOperation implements AuthorOperation {
 	}
 
 	public static String parseTopicObjects(List<Topic> topicObjects) {
+		logger.debug("started parseTopicObjects()");
+
 		String topicrefTree = "";
 
 		XMLOutputFactory actionsOutputFactory = XMLOutputFactory.newInstance();
 
 		ByteArrayOutputStream parserOutput = new ByteArrayOutputStream();
 
-		XMLStreamWriter streamWriter;
+		XMLStreamWriter streamWriter = null;
 		try {
 			streamWriter = actionsOutputFactory.createXMLStreamWriter(parserOutput);
 
@@ -307,18 +309,26 @@ public class GenerateOperation implements AuthorOperation {
 						streamWriter.writeEndElement();
 					}
 				}
+
+				logger.debug("streamWriter = " + currentTopicObject.toString());
 			}
+
+			streamWriter.writeEndDocument();
+			streamWriter.flush();
 
 		} catch (XMLStreamException e) {
 			e.printStackTrace();
 		}
 
 		try {
+
+			logger.debug("parserOutput = " + parserOutput.toString());
 			topicrefTree = parserOutput.toString(StandardCharsets.UTF_8.displayName());
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}
 
+		logger.debug("ended parseTopicObjects()");
 		return topicrefTree;
 	}
 }
