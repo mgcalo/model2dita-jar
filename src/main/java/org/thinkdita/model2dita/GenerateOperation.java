@@ -282,7 +282,7 @@ public class GenerateOperation implements AuthorOperation {
 		}
 	}
 
-	private static String parseTopicObjects(List<Topic> topicObjects) {
+	public static String parseTopicObjects(List<Topic> topicObjects) {
 		logger.debug("started parseTopicObjects()");
 
 		String topicrefTree = "";
