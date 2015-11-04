@@ -260,7 +260,7 @@ public class GenerateOperation implements AuthorOperation {
 		}
 	}
 
-	private void createProjectFile(File projectDir, String projectFileName, File templatesDir) {
+	private void createProjectFile(File projectDir, String projectName, String projectFileName, File templatesDir) {
 		String fileContent = null;
 		try {
 			fileContent = new Scanner(new FileInputStream(new File(templatesDir + File.separator
@@ -270,7 +270,8 @@ public class GenerateOperation implements AuthorOperation {
 		}
 		logger.debug("projectname fileContent: " + fileContent);
 
-		fileContent = fileContent.replace("${projectname}", projectFileName);
+		fileContent = fileContent.replace("${projectName}", projectName);
+		fileContent = fileContent.replace("${projectFileName}", projectFileName);
 		logger.debug("processed projectname fileContent: " + fileContent);
 
 		try {
