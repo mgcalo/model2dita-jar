@@ -28,7 +28,6 @@ import ro.sync.ecss.extensions.api.AuthorAccess;
 import ro.sync.ecss.extensions.api.AuthorDocumentController;
 import ro.sync.ecss.extensions.api.AuthorOperation;
 import ro.sync.ecss.extensions.api.AuthorOperationException;
-import ro.sync.ecss.extensions.api.access.AuthorEditorAccess;
 import ro.sync.ecss.extensions.api.access.AuthorWorkspaceAccess;
 import ro.sync.ecss.extensions.api.node.AuthorNode;
 import ro.sync.util.URLUtil;
@@ -58,7 +57,6 @@ public class GenerateOperation implements AuthorOperation {
 	 *      ArgumentsMap)
 	 */
 	public void doOperation(AuthorAccess authorAccess, ArgumentsMap args) throws AuthorOperationException {
-		AuthorEditorAccess authorEditorAccess = authorAccess.getEditorAccess();
 		AuthorDocumentController authorDocumentController = authorAccess.getDocumentController();
 		AuthorWorkspaceAccess authorWorkspaceAccess = authorAccess.getWorkspaceAccess();
 
@@ -74,15 +72,6 @@ public class GenerateOperation implements AuthorOperation {
 			return;
 		}
 
-		AuthorNode currentNode = null;
-
-		try {
-			currentNode = authorDocumentController.getNodeAtOffset(authorEditorAccess.getSelectionStart());
-		} catch (BadLocationException e) {
-
-			e.printStackTrace();
-		}
-
 		String projectName = "";
 		try {
 			projectName = authorDocumentController.findNodesByXPath("//projectname", true, true, true)[0]
@@ -90,7 +79,9 @@ public class GenerateOperation implements AuthorOperation {
 		} catch (BadLocationException e) {
 			e.printStackTrace();
 		}
+		String processedProjectName = projectName.trim().toLowerCase().replace(" ", "-");
 		logger.debug("projectName: " + projectName);
+		logger.debug("processedProjectName: " + processedProjectName);
 
 		String language = "en-US";
 		try {
@@ -150,7 +141,6 @@ public class GenerateOperation implements AuthorOperation {
 						+ authorDocumentController.findNodesByXPath("//title", topicAuthorNodes[i], true,
 								true, true, true)[0].getTextContent());
 			} catch (BadLocationException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			logger.debug("topicObject #" + (i + 1) + ": " + topicObject);
@@ -184,7 +174,10 @@ public class GenerateOperation implements AuthorOperation {
 		String topicrefTree = parseTopicObjects(topicObjects);
 		logger.debug("topicrefTree: " + topicrefTree);
 
-		createDitamapFile(projectDir, projectName, topicrefTree, templatesDir);
+		createDitamapFile(projectDir, projectName, processedProjectName, topicrefTree, templatesDir);
+
+		// Create the project file
+		createProjectFile(projectDir, processedProjectName, templatesDir);
 
 		// FileOutputStream f_out;
 		// try {
@@ -244,7 +237,8 @@ public class GenerateOperation implements AuthorOperation {
 		}
 	}
 
-	private void createDitamapFile(File path, String fileTitle, String topicrefTree, File templatesDir) {
+	private void createDitamapFile(File path, String projectName, String processedProjectName,
+			String topicrefTree, File templatesDir) {
 		String fileContent = null;
 		try {
 			fileContent = new Scanner(new FileInputStream(new File(templatesDir + File.separator
@@ -252,22 +246,43 @@ public class GenerateOperation implements AuthorOperation {
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
-		logger.debug("fileContent: " + fileContent);
+		logger.debug("ditamap fileContent: " + fileContent);
 
-		fileContent = fileContent.replace("${title}", fileTitle);
+		fileContent = fileContent.replace("${title}", projectName);
 		fileContent = fileContent.replace("${topicrefs}", topicrefTree);
-		logger.debug("processed fileContent: " + fileContent);
+		logger.debug("processed ditamap fileContent: " + fileContent);
 
 		try {
-			FileUtils.writeStringToFile(new File(path + File.separator
-					+ (fileTitle.trim().toLowerCase() + ".ditamap").replace(" ", "-")), fileContent,
+			FileUtils.writeStringToFile(
+					new File(path + File.separator + processedProjectName + ".ditamap"), fileContent,
 					"UTF-8");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 
-	public static String parseTopicObjects(List<Topic> topicObjects) {
+	private void createProjectFile(File projectDir, String processedProjectName, File templatesDir) {
+		String fileContent = null;
+		try {
+			fileContent = new Scanner(new FileInputStream(new File(templatesDir + File.separator
+					+ "projectname.xpr")), "UTF-8").useDelimiter("\\A").next();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		logger.debug("projectname fileContent: " + fileContent);
+
+		fileContent = fileContent.replace("${projectname}", processedProjectName);
+		logger.debug("processed projectname fileContent: " + fileContent);
+
+		try {
+			FileUtils.writeStringToFile(new File(projectDir + File.separator + processedProjectName
+					+ ".xpr"), fileContent, "UTF-8");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private static String parseTopicObjects(List<Topic> topicObjects) {
 		logger.debug("started parseTopicObjects()");
 
 		String topicrefTree = "";
@@ -296,9 +311,6 @@ public class GenerateOperation implements AuthorOperation {
 					streamWriter.writeStartElement("topicref");
 				}
 
-				// TODO: delete start
-				streamWriter.writeAttribute("level", Integer.toString(currentTopicObjectLevel));
-				// TODO: delete end
 				streamWriter.writeAttribute("href", currentTopicObject.getFilePath());
 				streamWriter.writeAttribute("navtitle", currentTopicObject.getTitle());
 				streamWriter.writeAttribute("format", "dita");
