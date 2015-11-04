@@ -177,7 +177,7 @@ public class GenerateOperation implements AuthorOperation {
 		createDitamapFile(projectDir, projectName, projectFileName, topicrefTree, templatesDir);
 
 		// Create the project file
-		createProjectFile(projectDir, projectFileName, templatesDir);
+		createProjectFile(projectDir, projectName, projectFileName, templatesDir);
 
 		// FileOutputStream f_out;
 		// try {
