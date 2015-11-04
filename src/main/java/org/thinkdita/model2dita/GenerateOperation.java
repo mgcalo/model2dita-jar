@@ -79,9 +79,9 @@ public class GenerateOperation implements AuthorOperation {
 		} catch (BadLocationException e) {
 			e.printStackTrace();
 		}
-		String processedProjectName = projectName.trim().toLowerCase().replace(" ", "-");
+		String projectFileName = projectName.trim().toLowerCase().replace(" ", "-");
 		logger.debug("projectName: " + projectName);
-		logger.debug("processedProjectName: " + processedProjectName);
+		logger.debug("processedProjectName: " + projectFileName);
 
 		String language = "en-US";
 		try {
@@ -174,10 +174,10 @@ public class GenerateOperation implements AuthorOperation {
 		String topicrefTree = parseTopicObjects(topicObjects);
 		logger.debug("topicrefTree: " + topicrefTree);
 
-		createDitamapFile(projectDir, projectName, processedProjectName, topicrefTree, templatesDir);
+		createDitamapFile(projectDir, projectName, projectFileName, topicrefTree, templatesDir);
 
 		// Create the project file
-		createProjectFile(projectDir, processedProjectName, templatesDir);
+		createProjectFile(projectDir, projectFileName, templatesDir);
 
 		// FileOutputStream f_out;
 		// try {
@@ -237,7 +237,7 @@ public class GenerateOperation implements AuthorOperation {
 		}
 	}
 
-	private void createDitamapFile(File path, String projectName, String processedProjectName,
+	private void createDitamapFile(File path, String projectName, String projectFileName,
 			String topicrefTree, File templatesDir) {
 		String fileContent = null;
 		try {
@@ -253,15 +253,14 @@ public class GenerateOperation implements AuthorOperation {
 		logger.debug("processed ditamap fileContent: " + fileContent);
 
 		try {
-			FileUtils.writeStringToFile(
-					new File(path + File.separator + processedProjectName + ".ditamap"), fileContent,
-					"UTF-8");
+			FileUtils.writeStringToFile(new File(path + File.separator + projectFileName + ".ditamap"),
+					fileContent, "UTF-8");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 
-	private void createProjectFile(File projectDir, String processedProjectName, File templatesDir) {
+	private void createProjectFile(File projectDir, String projectFileName, File templatesDir) {
 		String fileContent = null;
 		try {
 			fileContent = new Scanner(new FileInputStream(new File(templatesDir + File.separator
@@ -271,11 +270,11 @@ public class GenerateOperation implements AuthorOperation {
 		}
 		logger.debug("projectname fileContent: " + fileContent);
 
-		fileContent = fileContent.replace("${projectname}", processedProjectName);
+		fileContent = fileContent.replace("${projectname}", projectFileName);
 		logger.debug("processed projectname fileContent: " + fileContent);
 
 		try {
-			FileUtils.writeStringToFile(new File(projectDir + File.separator + processedProjectName
+			FileUtils.writeStringToFile(new File(projectDir + File.separator + projectFileName
 					+ ".xpr"), fileContent, "UTF-8");
 		} catch (IOException e) {
 			e.printStackTrace();
