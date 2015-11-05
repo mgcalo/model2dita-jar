@@ -16,17 +16,19 @@ public class Topic implements java.io.Serializable {
 	private String type;
 	private String filename;
 	private String filePath;
+	private String subfolderName;
 
 	public Topic(AuthorDocumentController authorDocumentController, AuthorNode topic) {
 		try {
-			setLevel(new Integer(authorDocumentController.findNodesByXPath("level", topic, true, true, true, false)[0]
-					.getTextContent()));
+			setLevel(new Integer(authorDocumentController.findNodesByXPath("level", topic, true, true,
+					true, false)[0].getTextContent()));
 			setTitle(authorDocumentController.findNodesByXPath("title", topic, true, true, true, false)[0]
 					.getTextContent());
 			setType(authorDocumentController.findNodesByXPath("type", topic, true, true, true, false)[0]
 					.getTextContent());
 			setFilename((getType().substring(0, 1) + "_" + getTitle().trim().toLowerCase() + ".xml")
 					.replace(" ", "-"));
+			setSubfolderName(getTitle().trim().toLowerCase().replace(" ", "-"));
 		} catch (BadLocationException e) {
 			e.printStackTrace();
 		} catch (AuthorOperationException e) {
@@ -74,9 +76,17 @@ public class Topic implements java.io.Serializable {
 	public void setFilePath(String filePath) {
 		this.filePath = filePath;
 	}
-	
+
+	public String getSubfolderName() {
+		return subfolderName;
+	}
+
+	public void setSubfolderName(String subfolderName) {
+		this.subfolderName = subfolderName;
+	}
+
 	public String toString() {
-		return "{" + "level = " + getLevel() + ", " + "title = " + getTitle() + ", " + "type = "
-				+ getType() + ", " + "filename = " + getFilename() + "}";
+		return "{" + "level = " + getLevel() + ", title = " + getTitle() + ", type = " + getType()
+				+ ", filename = " + getFilename() + ", subfolderName = " + getSubfolderName() + "}";
 	}
 }
