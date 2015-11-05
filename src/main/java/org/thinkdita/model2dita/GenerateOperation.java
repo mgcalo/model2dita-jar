@@ -107,23 +107,23 @@ public class GenerateOperation implements AuthorOperation {
 		File sourceFolder = new File(projectDir + File.separator + "source");
 		logger.debug("sourceFolder: " + sourceFolder);
 
-		String createSubfolder = "0";
+		String createSubfolders = "0";
 		try {
-			createSubfolder = authorDocumentController.findNodesByXPath("//subfolders", true, true, true)[0]
+			createSubfolders = authorDocumentController.findNodesByXPath("//subfolders", true, true, true)[0]
 					.getTextContent();
 		} catch (BadLocationException e) {
 			e.printStackTrace();
 		}
-		logger.debug("createSubfolder: " + createSubfolder);
+		logger.debug("createSubfolder: " + createSubfolders);
 
-		String createImagefolder = "0";
+		String createImageSubfolders = "0";
 		try {
-			createImagefolder = authorDocumentController
-					.findNodesByXPath("//img-folders", true, true, true)[0].getTextContent();
+			createImageSubfolders = authorDocumentController.findNodesByXPath("//img-folders", true, true,
+					true)[0].getTextContent();
 		} catch (BadLocationException e) {
 			e.printStackTrace();
 		}
-		logger.debug("createImagefolder: " + createImagefolder);
+		logger.debug("createImageSubfolders: " + createImageSubfolders);
 
 		// generate the 'topic' objects
 		AuthorNode rootNode = authorDocumentController.findNodesByXPath("/*", true, true, true)[0];
@@ -150,10 +150,10 @@ public class GenerateOperation implements AuthorOperation {
 		}
 		logger.debug("topicObjects: " + topicObjects);
 
-		// Create keymaps?
+		// create keymaps
 
-		// Create subfolders?
-		if (createSubfolder.equals("1")) {
+		// create subfolders
+		if (createSubfolders.equals("1")) {
 			File currentSubfolder = sourceFolder;
 			String currentRelativeSubfolder = "source/";
 
@@ -183,8 +183,8 @@ public class GenerateOperation implements AuthorOperation {
 			}
 		}
 
-		// Create image subfolders?
-		if (createImagefolder.equals("1")) {
+		// create image subfolders
+		if (createImageSubfolders.equals("1") && createSubfolders.equals("1")) {
 			for (int i = 0, il = topicAuthorNodesNumber; i < il; i++) {
 				Topic topicObject = topicObjects.get(i);
 				if (topicObject.getLevel() == 1) {
@@ -198,7 +198,6 @@ public class GenerateOperation implements AuthorOperation {
 					logger.debug("imgSubfolder: " + imgSubfolder);
 				}
 			}
-
 		} else {
 			try {
 				FileUtils.forceMkdir(new File(sourceFolder + File.separator + "aa_img"));
@@ -207,7 +206,7 @@ public class GenerateOperation implements AuthorOperation {
 			}
 		}
 
-		// Create the root ditamap
+		// create the root ditamap
 		String topicrefTree = parseTopicObjects(topicObjects);
 		logger.debug("topicrefTree: " + topicrefTree);
 
