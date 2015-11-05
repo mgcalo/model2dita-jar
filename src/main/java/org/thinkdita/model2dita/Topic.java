@@ -15,7 +15,7 @@ public class Topic implements java.io.Serializable {
 	private String title;
 	private String type;
 	private String filename;
-	private String filePath;
+	private String relativeFilePath;
 	private String subfolderName;
 
 	public Topic(AuthorDocumentController authorDocumentController, AuthorNode topic) {
@@ -70,11 +70,11 @@ public class Topic implements java.io.Serializable {
 	}
 
 	public String getFilePath() {
-		return filePath;
+		return relativeFilePath;
 	}
 
-	public void setFilePath(String filePath) {
-		this.filePath = filePath;
+	public void setRelativeFilePath(String filePath) {
+		this.relativeFilePath = filePath;
 	}
 
 	public String getSubfolderName() {
