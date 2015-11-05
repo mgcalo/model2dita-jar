@@ -137,7 +137,7 @@ public class GenerateOperation implements AuthorOperation {
 
 		for (int i = 0, il = topicAuthorNodesNumber; i < il; i++) {
 			Topic topicObject = new Topic(authorDocumentController, topicAuthorNodes[i]);
-			topicObject.setFilePath("source/" + topicObject.getFilename());
+			topicObject.setRelativeFilePath("source" + File.separator + topicObject.getFilename());
 			topicObjects.add(topicObject);
 			try {
 				logger.debug("title: "
@@ -156,9 +156,10 @@ public class GenerateOperation implements AuthorOperation {
 		if (createSubfolder.equals("1")) {
 			File currentSubfolder = sourceFolder;
 			for (int i = 0, il = topicAuthorNodesNumber; i < il; i++) {
-				Topic topic = topicObjects.get(i);
-				if (topic.getLevel() == 1) {
-					File subfolder = new File(sourceFolder + File.separator + topic.getSubfolderName());
+				Topic topicObject = topicObjects.get(i);
+				if (topicObject.getLevel() == 1) {
+					File subfolder = new File(sourceFolder + File.separator
+							+ topicObject.getSubfolderName());
 					try {
 						FileUtils.forceMkdir(subfolder);
 					} catch (IOException e) {
@@ -167,8 +168,15 @@ public class GenerateOperation implements AuthorOperation {
 					currentSubfolder = subfolder;
 					logger.debug("subfolder: " + subfolder);
 				}
-				
-				createTopicFile(currentSubfolder, topic, templatesDir);
+
+				topicObject.setRelativeFilePath("source" + File.separator + topicObject.getSubfolderName()
+						+ File.separator + topicObject.getFilename());
+				createTopicFile(currentSubfolder, topicObject, templatesDir);
+			}
+		} else {
+			for (int i = 0, il = topicAuthorNodesNumber; i < il; i++) {
+				Topic topic = topicObjects.get(i);
+				createTopicFile(sourceFolder, topic, templatesDir);
 			}
 		}
 
@@ -178,10 +186,6 @@ public class GenerateOperation implements AuthorOperation {
 		} else {
 			try {
 				FileUtils.forceMkdir(new File(sourceFolder + File.separator + "aa_img"));
-				for (int i = 0, il = topicAuthorNodesNumber; i < il; i++) {
-					Topic topic = topicObjects.get(i);
-					createTopicFile(sourceFolder, topic, templatesDir);
-				}
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
