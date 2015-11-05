@@ -185,6 +185,19 @@ public class GenerateOperation implements AuthorOperation {
 
 		// Create image subfolders?
 		if (createImagefolder.equals("1")) {
+			for (int i = 0, il = topicAuthorNodesNumber; i < il; i++) {
+				Topic topicObject = topicObjects.get(i);
+				if (topicObject.getLevel() == 1) {
+					File imgSubfolder = new File(sourceFolder + File.separator
+							+ topicObject.getSubfolderName() + File.separator + "aa_img");
+					try {
+						FileUtils.forceMkdir(imgSubfolder);
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+					logger.debug("imgSubfolder: " + imgSubfolder);
+				}
+			}
 
 		} else {
 			try {
@@ -336,7 +349,7 @@ public class GenerateOperation implements AuthorOperation {
 					streamWriter.writeStartElement("topicref");
 				}
 
-				streamWriter.writeAttribute("href", currentTopicObject.getFilePath());
+				streamWriter.writeAttribute("href", currentTopicObject.getRelativeFilePath());
 				streamWriter.writeAttribute("navtitle", currentTopicObject.getTitle());
 				streamWriter.writeAttribute("format", "dita");
 				streamWriter.writeAttribute("type", currentTopicObject.getType());
