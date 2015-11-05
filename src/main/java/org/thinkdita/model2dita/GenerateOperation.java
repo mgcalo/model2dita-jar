@@ -104,6 +104,9 @@ public class GenerateOperation implements AuthorOperation {
 				+ language);
 		logger.debug("templatesDir: " + templatesDir);
 
+		File sourceFolder = new File(projectDir + File.separator + "source");
+		logger.debug("sourceFolder: " + sourceFolder);
+
 		String createSubfolder = "0";
 		try {
 			createSubfolder = authorDocumentController.findNodesByXPath("//subfolders", true, true, true)[0]
@@ -151,7 +154,17 @@ public class GenerateOperation implements AuthorOperation {
 
 		// Create subfolders?
 		if (createSubfolder.equals("1")) {
-
+			for (int i = 0, il = topicAuthorNodesNumber; i < il; i++) {
+				Topic topic = topicObjects.get(i);
+				File subfolder = new File(sourceFolder + File.separator
+						+ topic.getFilename().replace(".xml", ""));
+				try {
+					FileUtils.forceMkdir(subfolder);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				logger.debug("subfolder: " + subfolder);
+			}
 		}
 
 		// Create image subfolders?
@@ -159,7 +172,6 @@ public class GenerateOperation implements AuthorOperation {
 
 		} else {
 			try {
-				File sourceFolder = new File(projectDir + File.separator + "source");
 				FileUtils.forceMkdir(new File(sourceFolder + File.separator + "aa_img"));
 				for (int i = 0, il = topicAuthorNodesNumber; i < il; i++) {
 					Topic topic = topicObjects.get(i);
@@ -260,7 +272,8 @@ public class GenerateOperation implements AuthorOperation {
 		}
 	}
 
-	private void createProjectFile(File projectDir, String projectName, String projectFileName, File templatesDir) {
+	private void createProjectFile(File projectDir, String projectName, String projectFileName,
+			File templatesDir) {
 		String fileContent = null;
 		try {
 			fileContent = new Scanner(new FileInputStream(new File(templatesDir + File.separator
@@ -275,8 +288,8 @@ public class GenerateOperation implements AuthorOperation {
 		logger.debug("processed projectname fileContent: " + fileContent);
 
 		try {
-			FileUtils.writeStringToFile(new File(projectDir + File.separator + projectFileName
-					+ ".xpr"), fileContent, "UTF-8");
+			FileUtils.writeStringToFile(new File(projectDir + File.separator + projectFileName + ".xpr"),
+					fileContent, "UTF-8");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
