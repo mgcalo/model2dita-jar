@@ -156,14 +156,15 @@ public class GenerateOperation implements AuthorOperation {
 		if (createSubfolder.equals("1")) {
 			for (int i = 0, il = topicAuthorNodesNumber; i < il; i++) {
 				Topic topic = topicObjects.get(i);
-				File subfolder = new File(sourceFolder + File.separator
-						+ topic.getFilename().replace(".xml", ""));
-				try {
-					FileUtils.forceMkdir(subfolder);
-				} catch (IOException e) {
-					e.printStackTrace();
+				if (topic.getLevel() == 1) {
+					File subfolder = new File(sourceFolder + File.separator + topic.getSubfolderName());
+					try {
+						FileUtils.forceMkdir(subfolder);
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+					logger.debug("subfolder: " + subfolder);
 				}
-				logger.debug("subfolder: " + subfolder);
 			}
 		}
 

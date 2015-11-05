@@ -28,6 +28,7 @@ public class Topic implements java.io.Serializable {
 					.getTextContent());
 			setFilename((getType().substring(0, 1) + "_" + getTitle().trim().toLowerCase() + ".xml")
 					.replace(" ", "-"));
+			setSubfolderName(getTitle().trim().toLowerCase().replace(" ", "-"));
 		} catch (BadLocationException e) {
 			e.printStackTrace();
 		} catch (AuthorOperationException e) {
