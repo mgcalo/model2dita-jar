@@ -155,6 +155,8 @@ public class GenerateOperation implements AuthorOperation {
 		// Create subfolders?
 		if (createSubfolder.equals("1")) {
 			File currentSubfolder = sourceFolder;
+			String currentRelativeSubfolder = "source/";
+
 			for (int i = 0, il = topicAuthorNodesNumber; i < il; i++) {
 				Topic topicObject = topicObjects.get(i);
 				if (topicObject.getLevel() == 1) {
@@ -166,11 +168,12 @@ public class GenerateOperation implements AuthorOperation {
 						e.printStackTrace();
 					}
 					currentSubfolder = subfolder;
+					currentRelativeSubfolder = "source/" + topicObject.getSubfolderName();
 					logger.debug("subfolder: " + subfolder);
+					logger.debug("currentRelativeSubfolder: " + currentRelativeSubfolder);
 				}
 
-				topicObject.setRelativeFilePath("source/" + topicObject.getSubfolderName() + "/"
-						+ topicObject.getFilename());
+				topicObject.setRelativeFilePath(currentRelativeSubfolder + "/" + topicObject.getFilename());
 				createTopicFile(currentSubfolder, topicObject, templatesDir);
 			}
 		} else {
