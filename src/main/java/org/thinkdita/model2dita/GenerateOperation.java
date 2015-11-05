@@ -154,6 +154,7 @@ public class GenerateOperation implements AuthorOperation {
 
 		// Create subfolders?
 		if (createSubfolder.equals("1")) {
+			File currentSubfolder = sourceFolder;
 			for (int i = 0, il = topicAuthorNodesNumber; i < il; i++) {
 				Topic topic = topicObjects.get(i);
 				if (topic.getLevel() == 1) {
@@ -163,8 +164,11 @@ public class GenerateOperation implements AuthorOperation {
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
+					currentSubfolder = subfolder;
 					logger.debug("subfolder: " + subfolder);
 				}
+				
+				createTopicFile(currentSubfolder, topic, templatesDir);
 			}
 		}
 
