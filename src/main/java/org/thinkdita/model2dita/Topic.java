@@ -69,7 +69,7 @@ public class Topic implements java.io.Serializable {
 		this.filename = filename;
 	}
 
-	public String getFilePath() {
+	public String getRelativeFilePath() {
 		return relativeFilePath;
 	}
 
@@ -87,6 +87,7 @@ public class Topic implements java.io.Serializable {
 
 	public String toString() {
 		return "{" + "level = " + getLevel() + ", title = " + getTitle() + ", type = " + getType()
-				+ ", filename = " + getFilename() + ", subfolderName = " + getSubfolderName() + "}";
+				+ ", filename = " + getFilename() + ", subfolderName = " + getSubfolderName()
+				+ ", relativeFilePath = " + getRelativeFilePath() + "}";
 	}
 }
