@@ -137,7 +137,7 @@ public class GenerateOperation implements AuthorOperation {
 
 		for (int i = 0, il = topicAuthorNodesNumber; i < il; i++) {
 			Topic topicObject = new Topic(authorDocumentController, topicAuthorNodes[i]);
-			topicObject.setRelativeFilePath("source" + File.separator + topicObject.getFilename());
+			topicObject.setRelativeFilePath("source/" + topicObject.getFilename());
 			topicObjects.add(topicObject);
 			try {
 				logger.debug("title: "
@@ -169,8 +169,8 @@ public class GenerateOperation implements AuthorOperation {
 					logger.debug("subfolder: " + subfolder);
 				}
 
-				topicObject.setRelativeFilePath("source" + File.separator + topicObject.getSubfolderName()
-						+ File.separator + topicObject.getFilename());
+				topicObject.setRelativeFilePath("source/" + topicObject.getSubfolderName() + "/"
+						+ topicObject.getFilename());
 				createTopicFile(currentSubfolder, topicObject, templatesDir);
 			}
 		} else {
