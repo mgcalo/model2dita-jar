@@ -161,7 +161,12 @@ public class GenerateOperation implements AuthorOperation {
 
 		// create keymaps
 		if (createKeymaps.equals("1")) {
-			createKeymapsFile(projectDir, templatesDir);
+			try {
+				FileUtils.copyFile(new File(templatesDir + File.separator + "prod-keys.ditamap"), new File(
+						projectDir + File.separator + "prod-keys.ditamap"));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}			
 		}
 
 		// create subfolders
@@ -226,6 +231,15 @@ public class GenerateOperation implements AuthorOperation {
 
 		// Create the project file
 		createProjectFile(projectDir, projectName, projectFileName, templatesDir);
+
+		if (createKeymaps.equals("1") && createSubfolders.equals("1") && createImageSubfolders.equals("1")) {
+			try {
+				FileUtils.copyFile(new File(templatesDir + File.separator + "img-keys.ditamap"), new File(
+						projectDir + File.separator + "img-keys.ditamap"));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 
 		// FileOutputStream f_out;
 		// try {
@@ -325,24 +339,6 @@ public class GenerateOperation implements AuthorOperation {
 
 		try {
 			FileUtils.writeStringToFile(new File(projectDir + File.separator + projectFileName + ".xpr"),
-					fileContent, "UTF-8");
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
-	private void createKeymapsFile(File projectDir, File templatesDir) {
-		String fileContent = null;
-		try {
-			fileContent = new Scanner(new FileInputStream(new File(templatesDir + File.separator
-					+ "prod-keys.ditamap")), "UTF-8").useDelimiter("\\A").next();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		}
-		logger.debug("prod-keys.ditamap fileContent: " + fileContent);
-
-		try {
-			FileUtils.writeStringToFile(new File(projectDir + File.separator + "prod-keys.ditamap"),
 					fileContent, "UTF-8");
 		} catch (IOException e) {
 			e.printStackTrace();
