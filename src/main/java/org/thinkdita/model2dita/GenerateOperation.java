@@ -56,6 +56,7 @@ public class GenerateOperation implements AuthorOperation {
 	 * @see ro.sync.ecss.extensions.api.AuthorOperation#doOperation(AuthorAccess,
 	 *      ArgumentsMap)
 	 */
+	@SuppressWarnings("resource")
 	public void doOperation(AuthorAccess authorAccess, ArgumentsMap args) throws AuthorOperationException {
 		AuthorDocumentController authorDocumentController = authorAccess.getDocumentController();
 		AuthorWorkspaceAccess authorWorkspaceAccess = authorAccess.getWorkspaceAccess();
@@ -161,7 +162,12 @@ public class GenerateOperation implements AuthorOperation {
 
 		// create keymaps
 		if (createKeymaps.equals("1")) {
-			createKeymapsFile(projectDir, templatesDir);
+			try {
+				FileUtils.copyFile(new File(templatesDir + File.separator + "prod-keys.ditamap"), new File(
+						projectDir + File.separator + "prod-keys.ditamap"));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 
 		// create subfolders
@@ -222,10 +228,41 @@ public class GenerateOperation implements AuthorOperation {
 		String topicrefTree = parseTopicObjects(topicObjects);
 		logger.debug("topicrefTree: " + topicrefTree);
 
-		createDitamapFile(projectDir, projectName, projectFileName, topicrefTree, templatesDir);
+		File rootDitamapFile = createRootDitamapFile(projectDir, projectName, projectFileName,
+				topicrefTree, templatesDir);
 
 		// Create the project file
 		createProjectFile(projectDir, projectName, projectFileName, templatesDir);
+
+		if (createKeymaps.equals("1") && createSubfolders.equals("1") && createImageSubfolders.equals("1")) {
+			String keysSectionText = "";
+			try {
+				FileUtils.copyFile(new File(templatesDir + File.separator + "img-keys.ditamap"), new File(
+						projectDir + File.separator + "img-keys.ditamap"));
+
+				// add keys-section.txt
+				String rootDitamapContent = FileUtils.readFileToString(rootDitamapFile, "UTF-8");
+				logger.debug("rootDitamapContent: " + rootDitamapContent);
+				keysSectionText = new Scanner(new FileInputStream(new File(templatesDir + File.separator
+						+ "keys-section.txt")), "UTF-8").useDelimiter("\\A").next();
+				logger.debug("keysSectionText: " + keysSectionText);
+				rootDitamapContent = rootDitamapContent.replace("</title>", "</title>" + keysSectionText);
+				logger.debug("rootDitamapContent: " + rootDitamapContent);
+				FileUtils.writeStringToFile(rootDitamapFile, rootDitamapContent, "UTF-8");
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+
+		if (createKeymaps.equals("1") && (createSubfolders.equals("0") || createSubfolders.equals("1"))
+				&& (createImageSubfolders.equals("0") || createImageSubfolders.equals("1"))) {
+			try {
+				FileUtils.copyFile(new File(templatesDir + File.separator + "img-keys.ditamap"), new File(
+						projectDir + File.separator + "aa_img" + File.separator + "img-keys.ditamap"));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 
 		// FileOutputStream f_out;
 		// try {
@@ -285,7 +322,7 @@ public class GenerateOperation implements AuthorOperation {
 		}
 	}
 
-	private void createDitamapFile(File path, String projectName, String projectFileName,
+	private File createRootDitamapFile(File path, String projectName, String projectFileName,
 			String topicrefTree, File templatesDir) {
 		String fileContent = null;
 		try {
@@ -300,12 +337,15 @@ public class GenerateOperation implements AuthorOperation {
 		fileContent = fileContent.replace("${topicrefs}", topicrefTree);
 		logger.debug("processed root.ditamap file content: " + fileContent);
 
+		File rootDitamapFile = new File(path + File.separator + projectFileName + ".ditamap");
+
 		try {
-			FileUtils.writeStringToFile(new File(path + File.separator + projectFileName + ".ditamap"),
-					fileContent, "UTF-8");
+			FileUtils.writeStringToFile(rootDitamapFile, fileContent, "UTF-8");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+
+		return rootDitamapFile;
 	}
 
 	private void createProjectFile(File projectDir, String projectName, String projectFileName,
@@ -325,24 +365,6 @@ public class GenerateOperation implements AuthorOperation {
 
 		try {
 			FileUtils.writeStringToFile(new File(projectDir + File.separator + projectFileName + ".xpr"),
-					fileContent, "UTF-8");
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
-	private void createKeymapsFile(File projectDir, File templatesDir) {
-		String fileContent = null;
-		try {
-			fileContent = new Scanner(new FileInputStream(new File(templatesDir + File.separator
-					+ "prod-keys.ditamap")), "UTF-8").useDelimiter("\\A").next();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		}
-		logger.debug("prod-keys.ditamap fileContent: " + fileContent);
-
-		try {
-			FileUtils.writeStringToFile(new File(projectDir + File.separator + "prod-keys.ditamap"),
 					fileContent, "UTF-8");
 		} catch (IOException e) {
 			e.printStackTrace();
