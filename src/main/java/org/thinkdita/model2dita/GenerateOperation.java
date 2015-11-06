@@ -258,7 +258,7 @@ public class GenerateOperation implements AuthorOperation {
 				&& (createImageSubfolders.equals("0") || createImageSubfolders.equals("1"))) {
 			try {
 				FileUtils.copyFile(new File(templatesDir + File.separator + "img-keys.ditamap"), new File(
-						projectDir + File.separator + "aa_img" + File.separator + "img-keys.ditamap"));
+						sourceFolder + File.separator + "aa_img" + File.separator + "img-keys.ditamap"));
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
