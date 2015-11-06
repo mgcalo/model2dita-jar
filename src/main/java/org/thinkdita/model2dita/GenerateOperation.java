@@ -125,6 +125,15 @@ public class GenerateOperation implements AuthorOperation {
 		}
 		logger.debug("createImageSubfolders: " + createImageSubfolders);
 
+		String createKeymaps = "0";
+		try {
+			createKeymaps = authorDocumentController.findNodesByXPath("//keymaps", true, true, true)[0]
+					.getTextContent();
+		} catch (BadLocationException e) {
+			e.printStackTrace();
+		}
+		logger.debug("createKeymaps: " + createKeymaps);
+
 		// generate the 'topic' objects
 		AuthorNode rootNode = authorDocumentController.findNodesByXPath("/*", true, true, true)[0];
 		logger.debug("rootNode name: " + rootNode.getName());
@@ -151,6 +160,9 @@ public class GenerateOperation implements AuthorOperation {
 		logger.debug("topicObjects: " + topicObjects);
 
 		// create keymaps
+		if (createKeymaps.equals("1")) {
+			createKeymapsFile(projectDir, templatesDir);
+		}
 
 		// create subfolders
 		if (createSubfolders.equals("1")) {
@@ -282,11 +294,11 @@ public class GenerateOperation implements AuthorOperation {
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
-		logger.debug("ditamap fileContent: " + fileContent);
+		logger.debug("root.ditamap file content: " + fileContent);
 
 		fileContent = fileContent.replace("${title}", projectName);
 		fileContent = fileContent.replace("${topicrefs}", topicrefTree);
-		logger.debug("processed ditamap fileContent: " + fileContent);
+		logger.debug("processed root.ditamap file content: " + fileContent);
 
 		try {
 			FileUtils.writeStringToFile(new File(path + File.separator + projectFileName + ".ditamap"),
@@ -305,14 +317,32 @@ public class GenerateOperation implements AuthorOperation {
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
-		logger.debug("projectname fileContent: " + fileContent);
+		logger.debug("projectname.xpr file content: " + fileContent);
 
 		fileContent = fileContent.replace("${projectName}", projectName);
 		fileContent = fileContent.replace("${projectFileName}", projectFileName);
-		logger.debug("processed projectname fileContent: " + fileContent);
+		logger.debug("processed projectname.xpr file content: " + fileContent);
 
 		try {
 			FileUtils.writeStringToFile(new File(projectDir + File.separator + projectFileName + ".xpr"),
+					fileContent, "UTF-8");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void createKeymapsFile(File projectDir, File templatesDir) {
+		String fileContent = null;
+		try {
+			fileContent = new Scanner(new FileInputStream(new File(templatesDir + File.separator
+					+ "prod-keys.ditamap")), "UTF-8").useDelimiter("\\A").next();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		logger.debug("prod-keys.ditamap fileContent: " + fileContent);
+
+		try {
+			FileUtils.writeStringToFile(new File(projectDir + File.separator + "prod-keys.ditamap"),
 					fileContent, "UTF-8");
 		} catch (IOException e) {
 			e.printStackTrace();
