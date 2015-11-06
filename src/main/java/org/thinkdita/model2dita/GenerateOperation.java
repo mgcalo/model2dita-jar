@@ -254,8 +254,10 @@ public class GenerateOperation implements AuthorOperation {
 			}
 		}
 
-		if (createKeymaps.equals("1") && (createSubfolders.equals("0") || createSubfolders.equals("1"))
-				&& (createImageSubfolders.equals("0") || createImageSubfolders.equals("1"))) {
+		if ((createKeymaps.equals("1") && createSubfolders.equals("1") && createImageSubfolders.equals("0"))
+				|| (createKeymaps.equals("1")
+						&& createSubfolders.equals("0") && (createImageSubfolders
+						.equals("0") || createImageSubfolders.equals("1")))) {
 			try {
 				FileUtils.copyFile(new File(templatesDir + File.separator + "img-keys.ditamap"), new File(
 						sourceFolder + File.separator + "aa_img" + File.separator + "img-keys.ditamap"));
