@@ -254,6 +254,16 @@ public class GenerateOperation implements AuthorOperation {
 			}
 		}
 
+		if (createKeymaps.equals("1") && (createSubfolders.equals("0") || createSubfolders.equals("1"))
+				&& (createImageSubfolders.equals("0") || createImageSubfolders.equals("1"))) {
+			try {
+				FileUtils.copyFile(new File(templatesDir + File.separator + "img-keys.ditamap"), new File(
+						projectDir + File.separator + "aa_img" + File.separator + "img-keys.ditamap"));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+
 		// FileOutputStream f_out;
 		// try {
 		// f_out = new FileOutputStream("topicObjects.ser");
