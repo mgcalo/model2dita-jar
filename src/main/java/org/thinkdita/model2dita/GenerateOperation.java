@@ -134,6 +134,16 @@ public class GenerateOperation implements AuthorOperation {
 			e.printStackTrace();
 		}
 		logger.debug("createKeymaps: " + createKeymaps);
+		
+		String createSubmaps = "0";
+		try {
+			createSubmaps = authorDocumentController.findNodesByXPath("//submaps", true, true, true)[0]
+					.getTextContent();
+		} catch (BadLocationException e) {
+			e.printStackTrace();
+		}
+		logger.debug("createSubmaps: " + createSubmaps);
+		
 
 		// generate the 'topic' objects
 		AuthorNode rootNode = authorDocumentController.findNodesByXPath("/*", true, true, true)[0];
@@ -256,6 +266,8 @@ public class GenerateOperation implements AuthorOperation {
 				e.printStackTrace();
 			}
 		}
+		
+		if (createKeymaps.equals("1") && createSubfolders.equals("1") && createImageSubfolders.equals("1")) {
 
 		// FileOutputStream f_out;
 		// try {
