@@ -235,32 +235,23 @@ public class GenerateOperation implements AuthorOperation {
 		createProjectFile(projectDir, projectName, projectFileName, templatesDir);
 
 		if (createKeymaps.equals("1") && createSubfolders.equals("1") && createImageSubfolders.equals("1")) {
-			String keysSectionText = "";
 			try {
 				FileUtils.copyFile(new File(templatesDir + File.separator + "img-keys.ditamap"), new File(
 						projectDir + File.separator + "img-keys.ditamap"));
 
-				// add keys-section.txt
-				String rootDitamapContent = FileUtils.readFileToString(rootDitamapFile, "UTF-8");
-				logger.debug("rootDitamapContent: " + rootDitamapContent);
-				keysSectionText = new Scanner(new FileInputStream(new File(templatesDir + File.separator
-						+ "keys-section.txt")), "UTF-8").useDelimiter("\\A").next();
-				logger.debug("keysSectionText: " + keysSectionText);
-				rootDitamapContent = rootDitamapContent.replace("</title>", "</title>" + keysSectionText);
-				logger.debug("rootDitamapContent: " + rootDitamapContent);
-				FileUtils.writeStringToFile(rootDitamapFile, rootDitamapContent, "UTF-8");
+				addKeysSection(rootDitamapFile, templatesDir);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
 
 		if ((createKeymaps.equals("1") && createSubfolders.equals("1") && createImageSubfolders.equals("0"))
-				|| (createKeymaps.equals("1")
-						&& createSubfolders.equals("0") && (createImageSubfolders
+				|| (createKeymaps.equals("1") && createSubfolders.equals("0") && (createImageSubfolders
 						.equals("0") || createImageSubfolders.equals("1")))) {
 			try {
 				FileUtils.copyFile(new File(templatesDir + File.separator + "img-keys.ditamap"), new File(
 						sourceFolder + File.separator + "aa_img" + File.separator + "img-keys.ditamap"));
+				addKeysSection(rootDitamapFile, templatesDir);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -277,6 +268,23 @@ public class GenerateOperation implements AuthorOperation {
 		// e.printStackTrace();
 		// }
 
+	}
+
+	@SuppressWarnings("resource")
+	private void addKeysSection(File rootDitamapFile, File templatesDir) {
+		String keysSectionText = "";
+		try {
+			String rootDitamapContent = FileUtils.readFileToString(rootDitamapFile, "UTF-8");
+			logger.debug("rootDitamapContent: " + rootDitamapContent);
+			keysSectionText = new Scanner(new FileInputStream(new File(templatesDir + File.separator
+					+ "keys-section.txt")), "UTF-8").useDelimiter("\\A").next();
+			logger.debug("keysSectionText: " + keysSectionText);
+			rootDitamapContent = rootDitamapContent.replace("</title>", "</title>" + keysSectionText);
+			logger.debug("rootDitamapContent: " + rootDitamapContent);
+			FileUtils.writeStringToFile(rootDitamapFile, rootDitamapContent, "UTF-8");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	/**
