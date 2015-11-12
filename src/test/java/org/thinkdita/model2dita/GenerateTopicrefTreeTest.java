@@ -1,6 +1,5 @@
 package org.thinkdita.model2dita;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -8,18 +7,20 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
-
-import javax.xml.stream.XMLOutputFactory;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamWriter;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class GenerateTopicrefTreeTest {
 
+	@Ignore
 	@Test
 	public void test1() {
 		FileInputStream fis;
@@ -52,4 +53,36 @@ public class GenerateTopicrefTreeTest {
 
 	}
 
+	@Test
+	public void test2() {
+		FileInputStream fis;
+		List<Topic> topicObjects = null;
+
+		try {
+			fis = new FileInputStream(new File(getClass().getResource("topicObjects.ser").toURI()));
+			ObjectInputStream ois = new ObjectInputStream(fis);
+
+			topicObjects = (List<Topic>) ois.readObject();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		} catch (URISyntaxException e) {
+			e.printStackTrace();
+		}
+
+		Map<String, List<Topic>> topicObjectsByParentFolderPath = topicObjects.stream().collect(
+				Collectors.groupingBy(Topic::getRelativeParentFolderPath));
+
+		System.out.println(topicObjects.size());
+		System.out.println(topicObjectsByParentFolderPath.size());
+		for (String relativeParentFolderPath : topicObjectsByParentFolderPath.keySet()) {
+			List<Topic> topicList = topicObjectsByParentFolderPath.get(relativeParentFolderPath);
+			String topicrefTree = GenerateOperation.parseTopicObjects(topicList);
+			topicrefTree = topicrefTree.substring(topicrefTree.indexOf(">") + 1, topicrefTree.lastIndexOf("<"));
+			System.out.println(topicrefTree);
+		}
+	}
 }
