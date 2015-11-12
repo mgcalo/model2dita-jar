@@ -16,6 +16,7 @@ public class Topic implements java.io.Serializable {
 	private String type;
 	private String filename;
 	private String relativeFilePath;
+	private String relativeParentFolderPath;
 	private String subfolderName;
 
 	public Topic(AuthorDocumentController authorDocumentController, AuthorNode topic) {
@@ -85,9 +86,18 @@ public class Topic implements java.io.Serializable {
 		this.subfolderName = subfolderName;
 	}
 
+	public String getRelativeParentFolderPath() {
+		return relativeParentFolderPath;
+	}
+
+	public void setRelativeParentFolderPath(String relativeParentFolderPath) {
+		this.relativeParentFolderPath = relativeParentFolderPath;
+	}
+
 	public String toString() {
 		return "{" + "level = " + getLevel() + ", title = " + getTitle() + ", type = " + getType()
 				+ ", filename = " + getFilename() + ", subfolderName = " + getSubfolderName()
-				+ ", relativeFilePath = " + getRelativeFilePath() + "}";
+				+ ", relativeFilePath = " + getRelativeFilePath() + ", relativeParentFolderPath = "
+				+ getRelativeParentFolderPath() + "}";
 	}
 }
