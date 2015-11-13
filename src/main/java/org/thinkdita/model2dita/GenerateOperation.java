@@ -4,12 +4,16 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 import javax.swing.text.BadLocationException;
 import javax.xml.stream.XMLOutputFactory;
@@ -134,7 +138,7 @@ public class GenerateOperation implements AuthorOperation {
 			e.printStackTrace();
 		}
 		logger.debug("createKeymaps: " + createKeymaps);
-		
+
 		String createSubmaps = "0";
 		try {
 			createSubmaps = authorDocumentController.findNodesByXPath("//submaps", true, true, true)[0]
@@ -143,7 +147,6 @@ public class GenerateOperation implements AuthorOperation {
 			e.printStackTrace();
 		}
 		logger.debug("createSubmaps: " + createSubmaps);
-		
 
 		// generate the 'topic' objects
 		AuthorNode rootNode = authorDocumentController.findNodesByXPath("/*", true, true, true)[0];
@@ -238,7 +241,7 @@ public class GenerateOperation implements AuthorOperation {
 		String topicrefTree = parseTopicObjects(topicObjects);
 		logger.debug("topicrefTree: " + topicrefTree);
 
-		File rootDitamapFile = createRootDitamapFile(projectDir, projectName, projectFileName,
+		File rootDitamapFile = createDitamapFile(projectDir, projectName, projectFileName,
 				topicrefTree, templatesDir);
 
 		// Create the project file
@@ -266,19 +269,40 @@ public class GenerateOperation implements AuthorOperation {
 				e.printStackTrace();
 			}
 		}
-		
-		if (createKeymaps.equals("1") && createSubfolders.equals("1") && createImageSubfolders.equals("1")) {
 
-		// FileOutputStream f_out;
-		// try {
-		// f_out = new FileOutputStream("topicObjects.ser");
-		// ObjectOutputStream obj_out = new ObjectOutputStream(f_out);
-		// obj_out.writeObject(topicObjects);
-		// } catch (FileNotFoundException e1) {
-		// e1.printStackTrace();
-		// } catch (IOException e) {
-		// e.printStackTrace();
-		// }
+		if (createSubfolders.equals("1")
+				&& (createImageSubfolders.equals("0") || createImageSubfolders.equals("1"))
+				&& createSubmaps.equals("1")) {
+			Map<String, List<Topic>> topicObjectsByParentFolderPath = topicObjects.stream().collect(
+					Collectors.groupingBy(Topic::getRelativeParentFolderPath));
+
+			for (String relativeParentFolderPath : topicObjectsByParentFolderPath.keySet()) {
+				List<Topic> topicSublist = topicObjectsByParentFolderPath.get(relativeParentFolderPath);
+				int topicSublistSize = topicSublist.size();
+				logger.debug("topicSublistSize = " + topicSublistSize);
+				
+				String topicrefSubTree = "";
+				if (topicSublistSize > 1) {
+					topicrefSubTree = GenerateOperation.parseTopicObjects(topicSublist);
+					topicrefSubTree = topicrefSubTree.substring(topicrefSubTree.indexOf(">") + 1, topicrefSubTree.lastIndexOf("<"));	
+				}
+				logger.debug("topicrefSubTree = " + topicrefSubTree);
+				
+				createDitamapFile(new File(projectDir + File.separator + relativeParentFolderPath), projectName, "s_" + topicSublist.get(0).getSubfolderName(),
+						topicrefSubTree, templatesDir);
+			}			
+		}
+
+		 FileOutputStream f_out;
+		 try {
+		 f_out = new FileOutputStream("topicObjects.ser");
+		 ObjectOutputStream obj_out = new ObjectOutputStream(f_out);
+		 obj_out.writeObject(topicObjects);
+		 } catch (FileNotFoundException e1) {
+		 e1.printStackTrace();
+		 } catch (IOException e) {
+		 e.printStackTrace();
+		 }
 
 	}
 
@@ -344,7 +368,7 @@ public class GenerateOperation implements AuthorOperation {
 		}
 	}
 
-	private File createRootDitamapFile(File path, String projectName, String projectFileName,
+	private File createDitamapFile(File parentFolderPath, String projectName, String fileName,
 			String topicrefTree, File templatesDir) {
 		String fileContent = null;
 		try {
@@ -359,7 +383,7 @@ public class GenerateOperation implements AuthorOperation {
 		fileContent = fileContent.replace("${topicrefs}", topicrefTree);
 		logger.debug("processed root.ditamap file content: " + fileContent);
 
-		File rootDitamapFile = new File(path + File.separator + projectFileName + ".ditamap");
+		File rootDitamapFile = new File(parentFolderPath + File.separator + fileName + ".ditamap");
 
 		try {
 			FileUtils.writeStringToFile(rootDitamapFile, fileContent, "UTF-8");
@@ -455,3 +479,17 @@ public class GenerateOperation implements AuthorOperation {
 		return topicrefTree;
 	}
 }
+
+// topicObject #1: {level = 1, title = Project plans with Trello, type =
+// concept, filename = c_project-plans-with-trello.xml, subfolderName =
+// project-plans-with-trello, relativeFilePath =
+// source/c_project-plans-with-trello.xml}
+
+// topicObject #2: {level = 2, title = To-do lists, type = concept, filename =
+// c_to-do-lists.xml, subfolderName = to-do-lists, relativeFilePath =
+// source/c_to-do-lists.xml}
+
+// topicObject #3: {level = 2, title = Agile boards, type = concept, filename =
+// c_agile-boards.xml, subfolderName = agile-boards, relativeFilePath =
+// source/c_agile-boards.xml}
+
