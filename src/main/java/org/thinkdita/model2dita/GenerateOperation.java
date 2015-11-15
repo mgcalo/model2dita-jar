@@ -206,7 +206,7 @@ public class GenerateOperation implements AuthorOperation {
 					logger.debug("currentRelativeSubfolder: " + currentRelativeSubfolder);
 				}
 
-				topicObject.setRelativeFilePath(topicObject.getFilename());
+				topicObject.setRelativeFilePath(currentRelativeSubfolder + "/" + topicObject.getFilename());
 				topicObject.setRelativeParentFolderPath(currentRelativeSubfolder);
 				createTopicFile(currentSubfolder, topicObject, templatesDir);
 			}
@@ -294,6 +294,7 @@ public class GenerateOperation implements AuthorOperation {
 					topicrefSubTree = topicrefSubTree.substring(topicrefSubTree.indexOf(">") + 1,
 							topicrefSubTree.lastIndexOf("<"));
 				}
+				topicrefSubTree = topicrefSubTree.replace(relativeParentFolderPath + "/", "");
 				logger.debug("topicrefSubTree = " + topicrefSubTree);
 
 				createDitamapFile(new File(projectDir + File.separator + relativeParentFolderPath),
@@ -509,17 +510,3 @@ public class GenerateOperation implements AuthorOperation {
 		}
 	}
 }
-
-// topicObject #1: {level = 1, title = Project plans with Trello, type =
-// concept, filename = c_project-plans-with-trello.xml, subfolderName =
-// project-plans-with-trello, relativeFilePath =
-// source/c_project-plans-with-trello.xml}
-
-// topicObject #2: {level = 2, title = To-do lists, type = concept, filename =
-// c_to-do-lists.xml, subfolderName = to-do-lists, relativeFilePath =
-// source/c_to-do-lists.xml}
-
-// topicObject #3: {level = 2, title = Agile boards, type = concept, filename =
-// c_agile-boards.xml, subfolderName = agile-boards, relativeFilePath =
-// source/c_agile-boards.xml}
-
