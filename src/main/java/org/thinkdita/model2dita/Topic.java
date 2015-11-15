@@ -75,7 +75,6 @@ public class Topic implements java.io.Serializable {
 	}
 
 	public void setRelativeFilePath(String filePath) {
-		setRelativeParentFolderPath(filePath.substring(0, filePath.lastIndexOf("/")));
 		this.relativeFilePath = filePath;
 	}
 

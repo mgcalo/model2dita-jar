@@ -206,7 +206,8 @@ public class GenerateOperation implements AuthorOperation {
 					logger.debug("currentRelativeSubfolder: " + currentRelativeSubfolder);
 				}
 
-				topicObject.setRelativeFilePath(currentRelativeSubfolder + "/" + topicObject.getFilename());
+				topicObject.setRelativeFilePath(topicObject.getFilename());
+				topicObject.setRelativeParentFolderPath(currentRelativeSubfolder);
 				createTopicFile(currentSubfolder, topicObject, templatesDir);
 			}
 		} else {
