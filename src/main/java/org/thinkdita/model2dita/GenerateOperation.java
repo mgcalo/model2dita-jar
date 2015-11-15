@@ -10,8 +10,10 @@ import java.io.ObjectOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 
@@ -241,8 +243,8 @@ public class GenerateOperation implements AuthorOperation {
 		String topicrefTree = parseTopicObjects(topicObjects);
 		logger.debug("topicrefTree: " + topicrefTree);
 
-		File rootDitamapFile = createDitamapFile(projectDir, projectName, projectFileName,
-				topicrefTree, templatesDir);
+		File rootDitamapFile = createDitamapFile(projectDir, projectName, projectFileName, topicrefTree,
+				templatesDir);
 
 		// Create the project file
 		createProjectFile(projectDir, projectName, projectFileName, templatesDir);
@@ -258,6 +260,7 @@ public class GenerateOperation implements AuthorOperation {
 			}
 		}
 
+		// cases d,e and g
 		if ((createKeymaps.equals("1") && createSubfolders.equals("1") && createImageSubfolders.equals("0"))
 				|| (createKeymaps.equals("1") && createSubfolders.equals("0") && (createImageSubfolders
 						.equals("0") || createImageSubfolders.equals("1")))) {
@@ -265,6 +268,9 @@ public class GenerateOperation implements AuthorOperation {
 				FileUtils.copyFile(new File(templatesDir + File.separator + "img-keys.ditamap"), new File(
 						sourceFolder + File.separator + "aa_img" + File.separator + "img-keys.ditamap"));
 				addKeysSection(rootDitamapFile, templatesDir);
+				Map<String, String> filters = new HashMap<String, String>();
+				filters.put("img-keys.ditamap", "source/aa_img/img-keys.ditamap");
+				filterFile(rootDitamapFile, filters);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -280,47 +286,32 @@ public class GenerateOperation implements AuthorOperation {
 				List<Topic> topicSublist = topicObjectsByParentFolderPath.get(relativeParentFolderPath);
 				int topicSublistSize = topicSublist.size();
 				logger.debug("topicSublistSize = " + topicSublistSize);
-				
+
 				String topicrefSubTree = "";
 				if (topicSublistSize > 1) {
 					topicrefSubTree = GenerateOperation.parseTopicObjects(topicSublist);
-					topicrefSubTree = topicrefSubTree.substring(topicrefSubTree.indexOf(">") + 1, topicrefSubTree.lastIndexOf("<"));	
+					topicrefSubTree = topicrefSubTree.substring(topicrefSubTree.indexOf(">") + 1,
+							topicrefSubTree.lastIndexOf("<"));
 				}
 				logger.debug("topicrefSubTree = " + topicrefSubTree);
-				
-				createDitamapFile(new File(projectDir + File.separator + relativeParentFolderPath), projectName, "s_" + topicSublist.get(0).getSubfolderName(),
-						topicrefSubTree, templatesDir);
-			}			
+
+				createDitamapFile(new File(projectDir + File.separator + relativeParentFolderPath),
+						projectName, "s_" + topicSublist.get(0).getSubfolderName(), topicrefSubTree,
+						templatesDir);
+			}
 		}
 
-		 FileOutputStream f_out;
-		 try {
-		 f_out = new FileOutputStream("topicObjects.ser");
-		 ObjectOutputStream obj_out = new ObjectOutputStream(f_out);
-		 obj_out.writeObject(topicObjects);
-		 } catch (FileNotFoundException e1) {
-		 e1.printStackTrace();
-		 } catch (IOException e) {
-		 e.printStackTrace();
-		 }
-
-	}
-
-	@SuppressWarnings("resource")
-	private void addKeysSection(File rootDitamapFile, File templatesDir) {
-		String keysSectionText = "";
+		FileOutputStream f_out;
 		try {
-			String rootDitamapContent = FileUtils.readFileToString(rootDitamapFile, "UTF-8");
-			logger.debug("rootDitamapContent: " + rootDitamapContent);
-			keysSectionText = new Scanner(new FileInputStream(new File(templatesDir + File.separator
-					+ "keys-section.txt")), "UTF-8").useDelimiter("\\A").next();
-			logger.debug("keysSectionText: " + keysSectionText);
-			rootDitamapContent = rootDitamapContent.replace("</title>", "</title>" + keysSectionText);
-			logger.debug("rootDitamapContent: " + rootDitamapContent);
-			FileUtils.writeStringToFile(rootDitamapFile, rootDitamapContent, "UTF-8");
+			f_out = new FileOutputStream("topicObjects.ser");
+			ObjectOutputStream obj_out = new ObjectOutputStream(f_out);
+			obj_out.writeObject(topicObjects);
+		} catch (FileNotFoundException e1) {
+			e1.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+
 	}
 
 	/**
@@ -477,6 +468,44 @@ public class GenerateOperation implements AuthorOperation {
 
 		logger.debug("ended parseTopicObjects()");
 		return topicrefTree;
+	}
+
+	@SuppressWarnings("resource")
+	private void addKeysSection(File rootDitamapFile, File templatesDir) {
+		String keysSectionText = "";
+		try {
+			String rootDitamapContent = FileUtils.readFileToString(rootDitamapFile, "UTF-8");
+			logger.debug("rootDitamapContent: " + rootDitamapContent);
+			keysSectionText = new Scanner(new FileInputStream(new File(templatesDir + File.separator
+					+ "keys-section.txt")), "UTF-8").useDelimiter("\\A").next();
+			logger.debug("keysSectionText: " + keysSectionText);
+			rootDitamapContent = rootDitamapContent.replace("</title>", "</title>" + keysSectionText);
+			logger.debug("rootDitamapContent: " + rootDitamapContent);
+			FileUtils.writeStringToFile(rootDitamapFile, rootDitamapContent, "UTF-8");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void filterFile(File file, Map<String, String> filters) {
+		String fileContent = "";
+		try {
+			fileContent = FileUtils.readFileToString(file, "UTF-8");
+			logger.debug("rootDitamapContent: " + fileContent);
+
+			for (Entry<String, String> filter : filters.entrySet()) {
+				String filterKey = filter.getKey();
+				String filterValue = filter.getValue();
+				fileContent = fileContent.replace(filterKey, filterValue);
+				logger.debug("filterKey: " + filterKey);
+				logger.debug("filterValue: " + filterValue);
+				logger.debug("rootDitamapContent: " + fileContent);
+			}
+
+			FileUtils.writeStringToFile(file, fileContent, "UTF-8");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 }
 
