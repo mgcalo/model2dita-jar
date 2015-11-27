@@ -41,7 +41,7 @@ public class GenerateTopicrefTreeTest {
 			e.printStackTrace();
 		}
 
-		String topicrefTree = GenerateOperation.parseTopicObjects(topicObjects);
+		String topicrefTree = GenerateOperation.parseTopicObjects(topicObjects, "topicref");
 
 		try {
 			FileUtils.writeStringToFile(new File("topicObjects.xml"), topicrefTree);
@@ -80,7 +80,7 @@ public class GenerateTopicrefTreeTest {
 		System.out.println(topicObjectsByParentFolderPath.size());
 		for (String relativeParentFolderPath : topicObjectsByParentFolderPath.keySet()) {
 			List<Topic> topicList = topicObjectsByParentFolderPath.get(relativeParentFolderPath);
-			String topicrefTree = GenerateOperation.parseTopicObjects(topicList);
+			String topicrefTree = GenerateOperation.parseTopicObjects(topicList, "topicref");
 			topicrefTree = topicrefTree.substring(topicrefTree.indexOf(">") + 1, topicrefTree.lastIndexOf("<"));
 			System.out.println(topicrefTree);
 		}

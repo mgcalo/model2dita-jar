@@ -241,7 +241,7 @@ public class GenerateOperation implements AuthorOperation {
 		}
 
 		// create the root ditamap
-		String topicrefTree = parseTopicObjects(topicObjects);
+		String topicrefTree = parseTopicObjects(topicObjects, "topicref");
 		logger.debug("topicrefTree: " + topicrefTree);
 
 		File rootDitamapFile = createDitamapFile(projectDir, projectName, projectFileName, topicrefTree,
@@ -302,7 +302,7 @@ public class GenerateOperation implements AuthorOperation {
 
 				String topicrefSubTree = "";
 				if (topicSublistSize > 1) {
-					topicrefSubTree = GenerateOperation.parseTopicObjects(topicSublist);
+					topicrefSubTree = GenerateOperation.parseTopicObjects(topicSublist, "topicref");
 					topicrefSubTree = topicrefSubTree.substring(topicrefSubTree.indexOf(">") + 1,
 							topicrefSubTree.lastIndexOf("<"));
 				}
@@ -423,7 +423,7 @@ public class GenerateOperation implements AuthorOperation {
 		}
 	}
 
-	public static String parseTopicObjects(List<Topic> topicObjects) {
+	public static String parseTopicObjects(List<Topic> topicObjects, String elementName) {
 		logger.debug("started parseTopicObjects()");
 
 		String topicrefTree = "";
@@ -447,9 +447,9 @@ public class GenerateOperation implements AuthorOperation {
 
 				if (currentTopicObjectLevel == nextTopicObjectLevel
 						|| currentTopicObjectLevel > nextTopicObjectLevel) {
-					streamWriter.writeEmptyElement("topicref");
+					streamWriter.writeEmptyElement(elementName);
 				} else {
-					streamWriter.writeStartElement("topicref");
+					streamWriter.writeStartElement(elementName);
 				}
 
 				streamWriter.writeAttribute("href", currentTopicObject.getRelativeFilePath());
