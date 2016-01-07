@@ -22,9 +22,15 @@
 		<dependency>
 			<groupId>ro.sync</groupId>
 			<artifactId>sdk</artifactId>
-			<version>17</version>
+			<version>17.1</version>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>com.oxygenxml</groupId>
+			<artifactId>oxygen-annotations</artifactId>
+			<version>17.1.0</version>
+			<scope>provided</scope>
+		</dependency>		
 		<dependency>
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
