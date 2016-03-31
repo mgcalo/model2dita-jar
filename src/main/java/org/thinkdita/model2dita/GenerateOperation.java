@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -92,23 +93,21 @@ public class GenerateOperation implements AuthorOperation {
 
 		String language = "en-US";
 		try {
-			language = authorDocumentController.findNodesByXPath("//language", true, true, true)[0]
-					.getTextContent();
+			language = authorDocumentController.findNodesByXPath("//language", true, true, true)[0].getTextContent();
 		} catch (BadLocationException e) {
 			e.printStackTrace();
 		}
 		logger.debug("language: " + language);
 
-		String oxygenInstallDir = URLUtil.uncorrect(authorAccess.getUtilAccess().expandEditorVariables(
-				"${oxygenInstallDir}", null));
+		String oxygenInstallDir = URLUtil
+				.uncorrect(authorAccess.getUtilAccess().expandEditorVariables("${oxygenInstallDir}", null));
 		logger.debug("oxygenInstallDir: " + oxygenInstallDir);
 
-		String frameworkDir = URLUtil.uncorrect(authorAccess.getUtilAccess().expandEditorVariables(
-				"${frameworkDir}", null));
+		String frameworkDir = URLUtil
+				.uncorrect(authorAccess.getUtilAccess().expandEditorVariables("${frameworkDir}", null));
 		logger.debug("frameworkDir: " + frameworkDir);
 
-		File templatesDir = new File(frameworkDir + File.separator + "templates" + File.separator
-				+ language);
+		File templatesDir = new File(frameworkDir + File.separator + "templates" + File.separator + language);
 		logger.debug("templatesDir: " + templatesDir);
 
 		File sourceFolder = new File(projectDir + File.separator + "source");
@@ -125,8 +124,8 @@ public class GenerateOperation implements AuthorOperation {
 
 		String createImageSubfolders = "0";
 		try {
-			createImageSubfolders = authorDocumentController.findNodesByXPath("//img-folders", true, true,
-					true)[0].getTextContent();
+			createImageSubfolders = authorDocumentController.findNodesByXPath("//img-folders", true, true, true)[0]
+					.getTextContent();
 		} catch (BadLocationException e) {
 			e.printStackTrace();
 		}
@@ -154,8 +153,8 @@ public class GenerateOperation implements AuthorOperation {
 		AuthorNode rootNode = authorDocumentController.findNodesByXPath("/*", true, true, true)[0];
 		logger.debug("rootNode name: " + rootNode.getName());
 
-		AuthorNode[] topicAuthorNodes = authorDocumentController.findNodesByXPath("//topic", null, true,
-				true, true, false);
+		AuthorNode[] topicAuthorNodes = authorDocumentController.findNodesByXPath("//topic", null, true, true, true,
+				false);
 		int topicAuthorNodesNumber = topicAuthorNodes.length;
 		logger.debug("topicAuthorNodes number: " + topicAuthorNodesNumber);
 		List<Topic> topicObjects = new ArrayList<Topic>();
@@ -165,9 +164,8 @@ public class GenerateOperation implements AuthorOperation {
 			topicObject.setRelativeFilePath("source/" + topicObject.getFilename());
 			topicObjects.add(topicObject);
 			try {
-				logger.debug("title: "
-						+ authorDocumentController.findNodesByXPath("//title", topicAuthorNodes[i], true,
-								true, true, true)[0].getTextContent());
+				logger.debug("title: " + authorDocumentController.findNodesByXPath("//title", topicAuthorNodes[i], true,
+						true, true, true)[0].getTextContent());
 			} catch (BadLocationException e) {
 				e.printStackTrace();
 			}
@@ -178,8 +176,8 @@ public class GenerateOperation implements AuthorOperation {
 		// create keymaps
 		if (createKeymaps.equals("1")) {
 			try {
-				FileUtils.copyFile(new File(templatesDir + File.separator + "prod-keys.ditamap"), new File(
-						projectDir + File.separator + "prod-keys.ditamap"));
+				FileUtils.copyFile(new File(templatesDir + File.separator + "prod-keys.ditamap"),
+						new File(projectDir + File.separator + "prod-keys.ditamap"));
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -193,8 +191,7 @@ public class GenerateOperation implements AuthorOperation {
 			for (int i = 0, il = topicAuthorNodesNumber; i < il; i++) {
 				Topic topicObject = topicObjects.get(i);
 				if (topicObject.getLevel() == 1) {
-					File subfolder = new File(sourceFolder + File.separator
-							+ topicObject.getSubfolderName());
+					File subfolder = new File(sourceFolder + File.separator + topicObject.getSubfolderName());
 					try {
 						FileUtils.forceMkdir(subfolder);
 					} catch (IOException e) {
@@ -222,8 +219,8 @@ public class GenerateOperation implements AuthorOperation {
 			for (int i = 0, il = topicAuthorNodesNumber; i < il; i++) {
 				Topic topicObject = topicObjects.get(i);
 				if (topicObject.getLevel() == 1) {
-					File imgSubfolder = new File(sourceFolder + File.separator
-							+ topicObject.getSubfolderName() + File.separator + "aa_img");
+					File imgSubfolder = new File(
+							sourceFolder + File.separator + topicObject.getSubfolderName() + File.separator + "aa_img");
 					try {
 						FileUtils.forceMkdir(imgSubfolder);
 					} catch (IOException e) {
@@ -241,59 +238,14 @@ public class GenerateOperation implements AuthorOperation {
 		}
 
 		// create the root ditamap
-		String topicrefTree = parseTopicObjects(topicObjects, "topicref");
-		logger.debug("topicrefTree: " + topicrefTree);
+		String referencesTree = parseTopicObjects(topicObjects, "topicref");
+		logger.debug("referencesTree: " + referencesTree);
 
-		File rootDitamapFile = createDitamapFile(projectDir, projectName, projectFileName, topicrefTree,
-				templatesDir);
-
-		// Create the project file
-		createProjectFile(projectDir, projectName, projectFileName, templatesDir);
-
-		if (createKeymaps.equals("1") && createSubfolders.equals("1") && createImageSubfolders.equals("1")) {
-			try {
-				FileUtils.copyFile(new File(templatesDir + File.separator + "img-keys.ditamap"), new File(
-						projectDir + File.separator + "img-keys.ditamap"));
-
-				Map<String, String> filters = new HashMap<String, String>();
-				String keysSectionText = new Scanner(new FileInputStream(new File(templatesDir
-						+ File.separator + "keys-section.txt")), StandardCharsets.UTF_8.displayName())
-						.useDelimiter("\\A").next();
-				filters.put("</title>", "</title>" + keysSectionText);
-				filterFile(rootDitamapFile, filters);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-
-		// cases d,e and g
-		if ((createKeymaps.equals("1") && createSubfolders.equals("1") && createImageSubfolders.equals("0"))
-				|| (createKeymaps.equals("1") && createSubfolders.equals("0") && (createImageSubfolders
-						.equals("0") || createImageSubfolders.equals("1")))) {
-			try {
-				FileUtils.copyFile(new File(templatesDir + File.separator + "img-keys.ditamap"), new File(
-						sourceFolder + File.separator + "aa_img" + File.separator + "img-keys.ditamap"));
-
-				Map<String, String> filters = new HashMap<String, String>();
-				String keysSectionText = new Scanner(new FileInputStream(new File(templatesDir
-						+ File.separator + "keys-section.txt")), StandardCharsets.UTF_8.displayName())
-						.useDelimiter("\\A").next();
-				filters.put("</title>", "</title>" + keysSectionText);
-				filterFile(rootDitamapFile, filters);
-
-				filters = new HashMap<String, String>();
-				filters.put("img-keys.ditamap", "source/aa_img/img-keys.ditamap");
-				filterFile(rootDitamapFile, filters);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-
-		if (createSubfolders.equals("1")
-				&& (createImageSubfolders.equals("0") || createImageSubfolders.equals("1"))
+		if (createSubfolders.equals("1") && (createImageSubfolders.equals("0") || createImageSubfolders.equals("1"))
 				&& createSubmaps.equals("1")) {
-			Map<String, List<Topic>> topicObjectsByParentFolderPath = topicObjects.stream().collect(
-					Collectors.groupingBy(Topic::getRelativeParentFolderPath));
+			Map<String, List<Topic>> topicObjectsByParentFolderPath = topicObjects.stream()
+					.collect(Collectors.groupingBy(Topic::getRelativeParentFolderPath));
+			referencesTree = "";
 
 			for (String relativeParentFolderPath : topicObjectsByParentFolderPath.keySet()) {
 				List<Topic> topicSublist = topicObjectsByParentFolderPath.get(relativeParentFolderPath);
@@ -309,13 +261,63 @@ public class GenerateOperation implements AuthorOperation {
 				topicrefSubTree = topicrefSubTree.replace(relativeParentFolderPath + "/", "");
 				logger.debug("topicrefSubTree = " + topicrefSubTree);
 
-				createDitamapFile(new File(projectDir + File.separator + relativeParentFolderPath),
-						projectName, "s_" + topicSublist.get(0).getSubfolderName(), topicrefSubTree,
-						templatesDir);
+				createDitamapFile(new File(projectDir + File.separator + relativeParentFolderPath), projectName,
+						"s_" + topicSublist.get(0).getSubfolderName(), topicrefSubTree, templatesDir);
+
+				referencesTree += "<mapref href=\"" + Paths.get(relativeParentFolderPath,
+						"s_" + topicSublist.get(0).getSubfolderName() + ".ditamap") + "\" />";
+			}
+
+			logger.debug("referencesTree = " + referencesTree);
+		}
+
+		File rootDitamapFile = createDitamapFile(projectDir, projectName, projectFileName, referencesTree,
+				templatesDir);
+
+		// Create the project file
+		createProjectFile(projectDir, projectName, projectFileName, templatesDir);
+
+		if (createKeymaps.equals("1") && createSubfolders.equals("1") && createImageSubfolders.equals("1")) {
+			try {
+				FileUtils.copyFile(new File(templatesDir + File.separator + "img-keys.ditamap"),
+						new File(projectDir + File.separator + "img-keys.ditamap"));
+
+				Map<String, String> filters = new HashMap<String, String>();
+				String keysSectionText = new Scanner(
+						new FileInputStream(new File(templatesDir + File.separator + "keys-section.txt")),
+						StandardCharsets.UTF_8.displayName()).useDelimiter("\\A").next();
+				filters.put("</title>", "</title>" + keysSectionText);
+				filterFile(rootDitamapFile, filters);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+
+		// cases d,e and g
+		if ((createKeymaps.equals("1") && createSubfolders.equals("1") && createImageSubfolders.equals("0"))
+				|| (createKeymaps.equals("1") && createSubfolders.equals("0")
+						&& (createImageSubfolders.equals("0") || createImageSubfolders.equals("1")))) {
+			try {
+				FileUtils.copyFile(new File(templatesDir + File.separator + "img-keys.ditamap"),
+						new File(sourceFolder + File.separator + "aa_img" + File.separator + "img-keys.ditamap"));
+
+				Map<String, String> filters = new HashMap<String, String>();
+				String keysSectionText = new Scanner(
+						new FileInputStream(new File(templatesDir + File.separator + "keys-section.txt")),
+						StandardCharsets.UTF_8.displayName()).useDelimiter("\\A").next();
+				filters.put("</title>", "</title>" + keysSectionText);
+				filterFile(rootDitamapFile, filters);
+
+				filters = new HashMap<String, String>();
+				filters.put("img-keys.ditamap", "source/aa_img/img-keys.ditamap");
+				filterFile(rootDitamapFile, filters);
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
 		}
 
 		FileOutputStream f_out;
+
 		try {
 			f_out = new FileOutputStream("topicObjects.ser");
 			ObjectOutputStream obj_out = new ObjectOutputStream(f_out);
@@ -355,8 +357,8 @@ public class GenerateOperation implements AuthorOperation {
 
 		String fileContent = null;
 		try {
-			fileContent = new Scanner(new FileInputStream(new File(templatesDir + File.separator + fileType
-					+ ".xml")), StandardCharsets.UTF_8.displayName()).useDelimiter("\\A").next();
+			fileContent = new Scanner(new FileInputStream(new File(templatesDir + File.separator + fileType + ".xml")),
+					StandardCharsets.UTF_8.displayName()).useDelimiter("\\A").next();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
@@ -374,12 +376,12 @@ public class GenerateOperation implements AuthorOperation {
 		}
 	}
 
-	private File createDitamapFile(File parentFolderPath, String projectName, String fileName,
-			String topicrefTree, File templatesDir) {
+	private File createDitamapFile(File parentFolderPath, String projectName, String fileName, String topicrefTree,
+			File templatesDir) {
 		String fileContent = null;
 		try {
-			fileContent = new Scanner(new FileInputStream(new File(templatesDir + File.separator
-					+ "root.ditamap")), StandardCharsets.UTF_8.displayName()).useDelimiter("\\A").next();
+			fileContent = new Scanner(new FileInputStream(new File(templatesDir + File.separator + "root.ditamap")),
+					StandardCharsets.UTF_8.displayName()).useDelimiter("\\A").next();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
@@ -400,12 +402,11 @@ public class GenerateOperation implements AuthorOperation {
 		return rootDitamapFile;
 	}
 
-	private void createProjectFile(File projectDir, String projectName, String projectFileName,
-			File templatesDir) {
+	private void createProjectFile(File projectDir, String projectName, String projectFileName, File templatesDir) {
 		String fileContent = null;
 		try {
-			fileContent = new Scanner(new FileInputStream(new File(templatesDir + File.separator
-					+ "projectname.xpr")), StandardCharsets.UTF_8.displayName()).useDelimiter("\\A").next();
+			fileContent = new Scanner(new FileInputStream(new File(templatesDir + File.separator + "projectname.xpr")),
+					StandardCharsets.UTF_8.displayName()).useDelimiter("\\A").next();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
@@ -416,8 +417,8 @@ public class GenerateOperation implements AuthorOperation {
 		logger.debug("processed projectname.xpr file content: " + fileContent);
 
 		try {
-			FileUtils.writeStringToFile(new File(projectDir + File.separator + projectFileName + ".xpr"),
-					fileContent, StandardCharsets.UTF_8.displayName());
+			FileUtils.writeStringToFile(new File(projectDir + File.separator + projectFileName + ".xpr"), fileContent,
+					StandardCharsets.UTF_8.displayName());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -442,11 +443,9 @@ public class GenerateOperation implements AuthorOperation {
 				Topic currentTopicObject = topicObjects.get(i);
 
 				int currentTopicObjectLevel = currentTopicObject.getLevel();
-				int nextTopicObjectLevel = (i == topicObjectsNumber - 1) ? 1 : topicObjects.get(i + 1)
-						.getLevel();
+				int nextTopicObjectLevel = (i == topicObjectsNumber - 1) ? 1 : topicObjects.get(i + 1).getLevel();
 
-				if (currentTopicObjectLevel == nextTopicObjectLevel
-						|| currentTopicObjectLevel > nextTopicObjectLevel) {
+				if (currentTopicObjectLevel == nextTopicObjectLevel || currentTopicObjectLevel > nextTopicObjectLevel) {
 					streamWriter.writeEmptyElement(elementName);
 				} else {
 					streamWriter.writeStartElement(elementName);
