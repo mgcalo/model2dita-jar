@@ -15,7 +15,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java-version>1.8</java-version>
-		<frameworkDir>/home/claudius/workspaces/repositories/git/model2dita</frameworkDir>
+		<frameworkDir>/home/claudius/oxygen/author/frameworks/model2dita</frameworkDir>
 		<oxygen.sdk.version>17.1.0.2</oxygen.sdk.version>
 	</properties>
 
