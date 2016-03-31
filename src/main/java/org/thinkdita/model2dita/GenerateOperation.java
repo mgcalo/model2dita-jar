@@ -248,6 +248,8 @@ public class GenerateOperation implements AuthorOperation {
 			referencesTree = "";
 
 			for (String relativeParentFolderPath : topicObjectsByParentFolderPath.keySet()) {
+				logger.debug("relativeParentFolderPath = " + relativeParentFolderPath);
+				
 				List<Topic> topicSublist = topicObjectsByParentFolderPath.get(relativeParentFolderPath);
 				int topicSublistSize = topicSublist.size();
 				logger.debug("topicSublistSize = " + topicSublistSize);
@@ -255,6 +257,7 @@ public class GenerateOperation implements AuthorOperation {
 				String topicrefSubTree = "";
 				if (topicSublistSize > 1) {
 					topicrefSubTree = GenerateOperation.parseTopicObjects(topicSublist, "topicref");
+					logger.debug("topicrefSubTree before substring = " + topicrefSubTree);
 					topicrefSubTree = topicrefSubTree.substring(topicrefSubTree.indexOf(">") + 1,
 							topicrefSubTree.lastIndexOf("<"));
 				}
