@@ -249,9 +249,10 @@ public class GenerateOperation implements AuthorOperation {
 
 			for (String relativeParentFolderPath : topicObjectsByParentFolderPath.keySet()) {
 				logger.debug("relativeParentFolderPath = " + relativeParentFolderPath);
-				
+
 				List<Topic> topicSublist = topicObjectsByParentFolderPath.get(relativeParentFolderPath);
 				int topicSublistSize = topicSublist.size();
+				logger.debug("topicSublistSize = " + topicSublistSize);
 				logger.debug("topicSublistSize = " + topicSublistSize);
 
 				String topicrefSubTree = "";
@@ -267,8 +268,8 @@ public class GenerateOperation implements AuthorOperation {
 				createDitamapFile(new File(projectDir + File.separator + relativeParentFolderPath), projectName,
 						"s_" + topicSublist.get(0).getSubfolderName(), topicrefSubTree, templatesDir);
 
-				referencesTree += "<mapref href=\"" + Paths.get(relativeParentFolderPath,
-						"s_" + topicSublist.get(0).getSubfolderName() + ".ditamap") + "\" />";
+				referencesTree += "<mapref href=\"" + relativeParentFolderPath + "/" + "s_"
+						+ topicSublist.get(0).getSubfolderName() + ".ditamap" + "\" />";
 			}
 
 			logger.debug("referencesTree = " + referencesTree);
