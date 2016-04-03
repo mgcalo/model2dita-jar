@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -258,9 +257,9 @@ public class GenerateOperation implements AuthorOperation {
 				String topicrefSubTree = "";
 				if (topicSublistSize > 1) {
 					topicrefSubTree = GenerateOperation.parseTopicObjects(topicSublist, "topicref");
-					logger.debug("topicrefSubTree before substring = " + topicrefSubTree);
-					topicrefSubTree = topicrefSubTree.substring(topicrefSubTree.indexOf(">") + 1,
-							topicrefSubTree.lastIndexOf("<"));
+//					logger.debug("topicrefSubTree before substring = " + topicrefSubTree);
+//					topicrefSubTree = topicrefSubTree.substring(topicrefSubTree.indexOf(">") + 1,
+//							topicrefSubTree.lastIndexOf("<"));
 				}
 				topicrefSubTree = topicrefSubTree.replace(relativeParentFolderPath + "/", "");
 				logger.debug("topicrefSubTree = " + topicrefSubTree);
