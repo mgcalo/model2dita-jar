@@ -11,10 +11,12 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Scanner;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.swing.text.BadLocationException;
@@ -243,26 +245,25 @@ public class GenerateOperation implements AuthorOperation {
 		if (createSubfolders.equals("1") && (createImageSubfolders.equals("0") || createImageSubfolders.equals("1"))
 				&& createSubmaps.equals("1")) {
 			Map<String, List<Topic>> topicObjectsByParentFolderPath = topicObjects.stream()
-					.collect(Collectors.groupingBy(Topic::getRelativeParentFolderPath));
+					.collect(Collectors.groupingBy(Topic::getRelativeParentFolderPath, LinkedHashMap::new,
+							Collectors.mapping(Function.identity(), Collectors.toList())));
+			logger.debug("topicObjectsByParentFolderPath: " + topicObjectsByParentFolderPath);
+
 			referencesTree = "";
 
 			for (String relativeParentFolderPath : topicObjectsByParentFolderPath.keySet()) {
-				logger.debug("relativeParentFolderPath = " + relativeParentFolderPath);
+				logger.debug("relativeParentFolderPath: " + relativeParentFolderPath);
 
 				List<Topic> topicSublist = topicObjectsByParentFolderPath.get(relativeParentFolderPath);
 				int topicSublistSize = topicSublist.size();
-				logger.debug("topicSublistSize = " + topicSublistSize);
-				logger.debug("topicSublistSize = " + topicSublistSize);
+				logger.debug("topicSublistSize: " + topicSublistSize);
 
 				String topicrefSubTree = "";
 				if (topicSublistSize > 1) {
-					topicrefSubTree = GenerateOperation.parseTopicObjects(topicSublist, "topicref");
-//					logger.debug("topicrefSubTree before substring = " + topicrefSubTree);
-//					topicrefSubTree = topicrefSubTree.substring(topicrefSubTree.indexOf(">") + 1,
-//							topicrefSubTree.lastIndexOf("<"));
+					topicrefSubTree = parseTopicObjects(topicSublist, "topicref");
 				}
 				topicrefSubTree = topicrefSubTree.replace(relativeParentFolderPath + "/", "");
-				logger.debug("topicrefSubTree = " + topicrefSubTree);
+				logger.debug("topicrefSubTree: " + topicrefSubTree);
 
 				createDitamapFile(new File(projectDir + File.separator + relativeParentFolderPath), projectName,
 						"s_" + topicSublist.get(0).getSubfolderName(), topicrefSubTree, templatesDir);
@@ -271,7 +272,7 @@ public class GenerateOperation implements AuthorOperation {
 						+ topicSublist.get(0).getSubfolderName() + ".ditamap" + "\" />";
 			}
 
-			logger.debug("referencesTree = " + referencesTree);
+			logger.debug("referencesTree: " + referencesTree);
 		}
 
 		File rootDitamapFile = createDitamapFile(projectDir, projectName, projectFileName, referencesTree,
