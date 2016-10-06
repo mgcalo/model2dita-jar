@@ -81,6 +81,14 @@ public class GenerateOperation implements AuthorOperation {
 			return;
 		}
 
+		// write the output folder to the input document
+		AuthorNode outputFolderNode = authorDocumentController.findNodesByXPath("//output-folder", true, true, true)[0];
+
+		if (outputFolderNode.getStartOffset() + 1 < outputFolderNode.getEndOffset()) {
+			authorDocumentController.delete(outputFolderNode.getStartOffset() + 1, outputFolderNode.getEndOffset() - 1);
+		}
+		authorDocumentController.insertText(outputFolderNode.getStartOffset() + 1, projectDir.getAbsolutePath());
+
 		String projectName = "";
 		try {
 			projectName = authorDocumentController.findNodesByXPath("//projectname", true, true, true)[0]
