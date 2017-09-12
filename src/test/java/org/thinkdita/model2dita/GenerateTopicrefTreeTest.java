@@ -7,9 +7,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -18,9 +15,9 @@ import org.apache.commons.io.FileUtils;
 import org.junit.Ignore;
 import org.junit.Test;
 
+@Ignore
 public class GenerateTopicrefTreeTest {
 
-	@Ignore
 	@Test
 	public void test1() {
 		FileInputStream fis;
@@ -31,6 +28,7 @@ public class GenerateTopicrefTreeTest {
 			ObjectInputStream ois = new ObjectInputStream(fis);
 
 			topicObjects = (List<Topic>) ois.readObject();
+			ois.close();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -63,6 +61,7 @@ public class GenerateTopicrefTreeTest {
 			ObjectInputStream ois = new ObjectInputStream(fis);
 
 			topicObjects = (List<Topic>) ois.readObject();
+			ois.close();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -73,8 +72,8 @@ public class GenerateTopicrefTreeTest {
 			e.printStackTrace();
 		}
 
-		Map<String, List<Topic>> topicObjectsByParentFolderPath = topicObjects.stream().collect(
-				Collectors.groupingBy(Topic::getRelativeParentFolderPath));
+		Map<String, List<Topic>> topicObjectsByParentFolderPath = topicObjects.stream()
+				.collect(Collectors.groupingBy(Topic::getRelativeParentFolderPath));
 
 		System.out.println(topicObjects.size());
 		System.out.println(topicObjectsByParentFolderPath.size());

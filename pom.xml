@@ -5,7 +5,7 @@
 
 	<groupId>org.thinkdita</groupId>
 	<artifactId>model2dita</artifactId>
-	<version>0.3</version>
+	<version>0.4</version>
 	<packaging>jar</packaging>
 
 	<prerequisites>
