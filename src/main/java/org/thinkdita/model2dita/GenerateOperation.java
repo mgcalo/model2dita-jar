@@ -2,7 +2,6 @@ package org.thinkdita.model2dita;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -15,7 +14,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Scanner;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -295,9 +293,9 @@ public class GenerateOperation implements AuthorOperation {
 						new File(projectDir + File.separator + "img-keys.ditamap"));
 
 				Map<String, String> filters = new HashMap<String, String>();
-				String keysSectionText = new Scanner(
-						new FileInputStream(new File(templatesDir + File.separator + "keys-section.txt")),
-						StandardCharsets.UTF_8.displayName()).useDelimiter("\\A").next();
+				String keysSectionText = FileUtils.readFileToString(
+						new File(templatesDir + File.separator + "keys-section.txt"),
+						StandardCharsets.UTF_8.displayName());
 				filters.put("</title>", "</title>" + keysSectionText);
 				filterFile(rootDitamapFile, filters);
 			} catch (IOException e) {
@@ -314,9 +312,9 @@ public class GenerateOperation implements AuthorOperation {
 						new File(sourceFolder + File.separator + "aa_img" + File.separator + "img-keys.ditamap"));
 
 				Map<String, String> filters = new HashMap<String, String>();
-				String keysSectionText = new Scanner(
-						new FileInputStream(new File(templatesDir + File.separator + "keys-section.txt")),
-						StandardCharsets.UTF_8.displayName()).useDelimiter("\\A").next();
+				String keysSectionText = FileUtils.readFileToString(
+						new File(templatesDir + File.separator + "keys-section.txt"),
+						StandardCharsets.UTF_8.displayName());
 				filters.put("</title>", "</title>" + keysSectionText);
 				filterFile(rootDitamapFile, filters);
 
@@ -369,9 +367,9 @@ public class GenerateOperation implements AuthorOperation {
 
 		String fileContent = null;
 		try {
-			fileContent = new Scanner(new FileInputStream(new File(templatesDir + File.separator + fileType + ".xml")),
-					StandardCharsets.UTF_8.displayName()).useDelimiter("\\A").next();
-		} catch (FileNotFoundException e) {
+			fileContent = FileUtils.readFileToString(new File(templatesDir + File.separator + fileType + ".xml"),
+					StandardCharsets.UTF_8.displayName());
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		logger.debug("fileContent: " + fileContent);
@@ -392,9 +390,9 @@ public class GenerateOperation implements AuthorOperation {
 			File templatesDir) {
 		String fileContent = null;
 		try {
-			fileContent = new Scanner(new FileInputStream(new File(templatesDir + File.separator + "root.ditamap")),
-					StandardCharsets.UTF_8.displayName()).useDelimiter("\\A").next();
-		} catch (FileNotFoundException e) {
+			fileContent = FileUtils.readFileToString(new File(templatesDir + File.separator + "root.ditamap"),
+					StandardCharsets.UTF_8.displayName());
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		logger.debug("root.ditamap file content: " + fileContent);
@@ -417,9 +415,9 @@ public class GenerateOperation implements AuthorOperation {
 	private void createProjectFile(File projectDir, String projectName, String projectFileName, File templatesDir) {
 		String fileContent = null;
 		try {
-			fileContent = new Scanner(new FileInputStream(new File(templatesDir + File.separator + "projectname.xpr")),
-					StandardCharsets.UTF_8.displayName()).useDelimiter("\\A").next();
-		} catch (FileNotFoundException e) {
+			fileContent = FileUtils.readFileToString(new File(templatesDir + File.separator + "projectname.xpr"),
+					StandardCharsets.UTF_8.displayName());
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		logger.debug("projectname.xpr file content: " + fileContent);
@@ -500,7 +498,7 @@ public class GenerateOperation implements AuthorOperation {
 		String fileContent = "";
 		try {
 			fileContent = FileUtils.readFileToString(file, StandardCharsets.UTF_8.displayName());
-			logger.debug("rootDitamapContent: " + fileContent);
+			logger.debug("file content to be filtered: " + fileContent);
 
 			for (Entry<String, String> filter : filters.entrySet()) {
 				String filterKey = filter.getKey();
@@ -512,6 +510,7 @@ public class GenerateOperation implements AuthorOperation {
 			}
 
 			FileUtils.writeStringToFile(file, fileContent, StandardCharsets.UTF_8.displayName());
+			logger.debug("file content that was filtered: " + fileContent);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
