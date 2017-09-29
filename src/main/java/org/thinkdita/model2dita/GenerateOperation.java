@@ -72,10 +72,7 @@ public class GenerateOperation implements AuthorOperation {
 		projectDir = authorWorkspaceAccess.chooseDirectory();
 		logger.debug("projectDir: " + projectDir);
 
-		if (projectDir != null) {
-		} else {
-			authorWorkspaceAccess
-					.showErrorMessage("You have to choose an existing folder, otherwise this operation will stop.");
+		if (projectDir == null) {
 			return;
 		}
 
