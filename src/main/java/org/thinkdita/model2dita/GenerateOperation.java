@@ -8,6 +8,9 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -72,12 +75,12 @@ public class GenerateOperation implements AuthorOperation {
 		projectDir = authorWorkspaceAccess.chooseDirectory();
 		logger.debug("projectDir: " + projectDir);
 
-		if (projectDir != null) {
-		} else {
-			authorWorkspaceAccess
-					.showErrorMessage("You have to choose an existing folder, otherwise this operation will stop.");
+		if (projectDir == null) {
 			return;
 		}
+
+		Path projectDirPath = projectDir.toPath();
+		logger.debug("projectDirPath: " + projectDirPath);
 
 		// write the output folder to the input document
 		AuthorNode outputFolderNode = authorDocumentController.findNodesByXPath("//output-folder", true, true, true)[0];
@@ -117,8 +120,14 @@ public class GenerateOperation implements AuthorOperation {
 		File templatesDir = new File(frameworkDir + File.separator + "templates" + File.separator + language);
 		logger.debug("templatesDir: " + templatesDir);
 
+		Path templatesDirPath = Paths.get(frameworkDir, "templates", language);
+		logger.debug("templatesDirPath: " + templatesDirPath);
+
 		File sourceFolder = new File(projectDir + File.separator + "source");
 		logger.debug("sourceFolder: " + sourceFolder);
+
+		Path sourceFolderPath = projectDirPath.resolve("source");
+		logger.debug("sourceFolderPath: " + sourceFolderPath);
 
 		String createSubfolders = "0";
 		try {
@@ -200,7 +209,7 @@ public class GenerateOperation implements AuthorOperation {
 				if (topicObject.getLevel() == 1) {
 					File subfolder = new File(sourceFolder + File.separator + topicObject.getSubfolderName());
 					try {
-						FileUtils.forceMkdir(subfolder);
+						Files.createDirectories(sourceFolderPath.resolve(topicObject.getSubfolderName()));
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
@@ -266,6 +275,8 @@ public class GenerateOperation implements AuthorOperation {
 
 				String topicrefSubTree = "";
 				if (topicSublistSize > 1) {
+					topicrefSubTree = parseTopicObjects(topicSublist, "topicref");
+				} else {
 					topicrefSubTree = parseTopicObjects(topicSublist, "topicref");
 				}
 				topicrefSubTree = topicrefSubTree.replace(relativeParentFolderPath + "/", "");
